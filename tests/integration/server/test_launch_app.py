@@ -144,3 +144,15 @@ class TestLaunchApp:
                 f"Expected {expected_status_code} but "
                 f"got {response.status_code} for {method} {endpoint}"
             )
+
+
+class TestChatRouterNoAuth:
+    _CHAT_PARAMS = {
+        "type": "builtin_provider",
+        "provider": "ANTHROPIC",
+        "model_name": "claude-3-5-sonnet-20241022",
+    }
+
+    def test_chat_is_accessible_when_auth_disabled(self, _no_auth_app: _AppInfo) -> None:
+        response = _httpx_client(_no_auth_app).post("/chat", params=self._CHAT_PARAMS)
+        assert response.status_code != 401
