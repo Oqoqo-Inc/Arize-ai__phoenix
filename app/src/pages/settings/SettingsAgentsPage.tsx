@@ -7,7 +7,7 @@ import { fieldBaseCSS } from "@phoenix/components/field/styles";
 import type { GenerativeProviderKey } from "@phoenix/components/generative/__generated__/ModelMenuQuery.graphql";
 import {
   ModelMenu,
-  ModelMenuValue,
+  type ModelMenuValue,
 } from "@phoenix/components/generative/ModelMenu";
 
 const AgentChat = lazy(() => import("./AgentChat"));
