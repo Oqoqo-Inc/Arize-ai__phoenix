@@ -46,7 +46,7 @@ class ChatSearchParamsModel(RootModel[ChatSearchParams]):
     root: ChatSearchParams
 
 
-def _get_pydantic_ai_model_from_generative_model_custom_provider(
+async def _get_pydantic_ai_model_from_generative_model_custom_provider(
     provider: models.GenerativeModelCustomProvider,
     model_name: str,
     decrypt: Callable[[bytes], bytes],
@@ -60,19 +60,19 @@ def _get_pydantic_ai_model_from_generative_model_custom_provider(
     config = GenerativeModelCustomerProviderConfig.model_validate_json(decrypted_data).root
 
     if config.type == "openai":
-        openai_client_factory = config.get_client_factory()
-        openai_client = openai_client_factory()
-        provider = OpenAIProvider(openai_client=openai_client)
+        openai_client_factory = config.get_client_factory()()
+        async with openai_client_factory as openai_client:
+            openai_provider = OpenAIProvider(openai_client=openai_client)
         if config.openai_api_type == "responses":
-            return OpenAIResponsesModel(model_name, provider=provider)
+            return OpenAIResponsesModel(model_name, provider=openai_provider)
         if config.openai_api_type == "chat_completions":
-            return OpenAIChatModel(model_name, provider=provider)
+            return OpenAIChatModel(model_name, provider=openai_provider)
         assert_never(config.openai_api_type)
     elif config.type == "anthropic":
-        anthropic_client_factory = config.get_client_factory()
-        anthropic_client = anthropic_client_factory()
-        provider = AnthropicProvider(anthropic_client=anthropic_client)
-        return AnthropicModel(model_name, provider=provider)
+        anthropic_client_factory = config.get_client_factory()()
+        async with anthropic_client_factory as anthropic_client:
+            anthropic_provider = AnthropicProvider(anthropic_client=anthropic_client)
+        return AnthropicModel(model_name, provider=anthropic_provider)
     raise NotImplementedError(f"Unsupported config type: {config.type}")
 
 
@@ -131,7 +131,7 @@ def create_chat_router(authentication_enabled: bool) -> APIRouter:
                 )
             if provider is None:
                 raise HTTPException(status_code=404, detail="Custom provider not found.")
-            model = _get_pydantic_ai_model_from_generative_model_custom_provider(
+            model = await _get_pydantic_ai_model_from_generative_model_custom_provider(
                 provider=provider,
                 model_name=params_.model_name,
                 decrypt=request.app.state.decrypt,
