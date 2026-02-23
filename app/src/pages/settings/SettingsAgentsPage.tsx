@@ -107,12 +107,7 @@ export function SettingsAgentsPage() {
               Clear
             </Button>
           </Flex>
-          <Text
-            slot="description"
-            css={css`
-              color: red;
-            `}
-          >
+          <Text slot="description">
             The AI provider and model used by the Phoenix agent.
           </Text>
         </div>
