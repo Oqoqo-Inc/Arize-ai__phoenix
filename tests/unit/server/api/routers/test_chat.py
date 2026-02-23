@@ -8,7 +8,7 @@ from tests.unit.vcr import CustomVCR
 
 def _parse_sse(content: str) -> list[Union[dict[str, Any], str]]:
     """Parse SSE content into a list of parsed JSON events or the literal '[DONE]' sentinel."""
-    events = []
+    events: list[dict[str, Any] | str] = []
     for block in content.strip().split("\n\n"):
         block = block.strip()
         if not block:
