@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.11.0](https://github.com/Arize-ai/phoenix/compare/arize-phoenix-evals-v2.10.0...arize-phoenix-evals-v2.11.0) (2026-02-23)
+
+
+### Features
+
+* **evals:** add conciseness classification evaluator  ([#11437](https://github.com/Arize-ai/phoenix/issues/11437)) ([d43c4ee](https://github.com/Arize-ai/phoenix/commit/d43c4eef5cf24845fdf26f0241f36496abf1a006))
+
+
+### Bug Fixes
+
+* update slack invitation link ([#11612](https://github.com/Arize-ai/phoenix/issues/11612)) ([316833e](https://github.com/Arize-ai/phoenix/commit/316833e629baf1b9185d7c712d8816b927d69a96))
+
 ## [2.10.0](https://github.com/Arize-ai/phoenix/compare/arize-phoenix-evals-v2.9.0...arize-phoenix-evals-v2.10.0) (2026-02-13)
 
 
