@@ -33,7 +33,7 @@ class BuiltInProviderChatSearchParams(BaseModel):
     endpoint: str | None = None
     region: str | None = None
     custom_headers: dict[str, str] | None = None
-    openai_api_type: Literal["chat_completions", "responses"] | None = None
+    openai_api_type: Literal["chat_completions", "responses"] = "responses"
 
 
 ChatSearchParams = Annotated[
