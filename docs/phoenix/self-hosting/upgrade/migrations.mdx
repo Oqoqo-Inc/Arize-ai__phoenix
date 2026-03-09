@@ -7,6 +7,20 @@ New major versions of Phoenix may contain database migrations that run automatic
 
 All migrations are documented in the main [MIGRATION doc](https://github.com/Arize-ai/phoenix/blob/main/MIGRATION.md)
 
+## Rolling Upgrades
+
+If you deploy a new Phoenix instance while an older Phoenix instance is still serving traffic against the same PostgreSQL database, set `PHOENIX_MIGRATE_INDEX_CONCURRENTLY=true` on the new instance.
+
+This tells Phoenix to build new indexes with PostgreSQL's `CREATE INDEX CONCURRENTLY`, which avoids blocking writes from the older instance while the migration runs.
+
+<Info>
+Use this setting for rolling deployments where the older instance may still be ingesting traces during startup. Phoenix ignores this setting when you use SQLite.
+</Info>
+
+<Warning>
+Concurrent index creation is slower than the default migration path, so the new instance can take longer to start. For very large tables, plan extra startup time or create indexes before the upgrade window.
+</Warning>
+
 ## Migration Reliability & Testing
 
 Phoenix takes database migration reliability seriously and follows strict practices to minimize risk:
