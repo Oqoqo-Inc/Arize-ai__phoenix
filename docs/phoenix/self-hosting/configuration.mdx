@@ -69,6 +69,8 @@ The following environment variables will control how your phoenix server runs.
 
 * **PHOENIX\_ENABLE\_PROMETHEUS:** Whether to enable Prometheus metrics at port 9090. Defaults to false.
 
+* **PHOENIX\_MAX\_SPANS\_QUEUE\_SIZE:** Maximum number of spans Phoenix will hold in memory before temporarily rejecting new trace uploads. Defaults to `20000`. Increase this only if the server has enough memory and the database can keep up with ingestion.
+
 * **PHOENIX\_SERVER\_INSTRUMENTATION\_OTLP\_TRACE\_COLLECTOR\_HTTP\_ENDPOINT:** Specifies an HTTP endpoint for the OTLP trace collector. Specifying this variable enables the OpenTelemetry tracer and exporter for the Phoenix server.
 
 * **PHOENIX\_SERVER\_INSTRUMENTATION\_OTLP\_TRACE\_COLLECTOR\_GRPC\_ENDPOINT:** Specifies an gRPC endpoint for the OTLP trace collector. Specifying this variable enables the OpenTelemetry tracer and exporter for the Phoenix server.
@@ -80,6 +82,16 @@ The following environment variables will control how your phoenix server runs.
 * **PHOENIX\_ENABLE\_STRONG\_PASSWORD\_POLICY:** Enables a stronger password policy. When set to `True`, passwords must meet the following requirements: at least 12 characters, at least one uppercase letter, at least one lowercase letter, at least one number, and at least one special character. Defaults to `False` (minimum 4 characters).
 
 * **PHOENIX\_TELEMETRY\_ENABLED:** Toggle for telemetry (enabled by default). Set to `false` if you want to disable all analytics tracking. Only basic web analytics are collected (e.g., page views, UI interactions). No trace data or sensitive information is ever collected.
+
+### Trace Ingestion Queue
+
+Phoenix buffers spans before writing them to the database. `PHOENIX_MAX_SPANS_QUEUE_SIZE` controls how many spans can wait in that queue.
+
+<Info>
+If the queue is full, Phoenix temporarily rejects new trace uploads with HTTP `503 Service Unavailable` on the HTTP collector and `RESOURCE_EXHAUSTED` on the gRPC collector. This usually means the server does not have enough headroom to absorb the current ingestion rate.
+</Info>
+
+As a rough guide, the default queue size of `20000` spans can use about 1 GiB of memory when spans average around 50 KiB each. Increase the limit only if the server has enough memory and the database can keep up.
 
 ### Logging
 
