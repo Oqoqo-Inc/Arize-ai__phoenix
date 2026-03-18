@@ -65,6 +65,12 @@ The following environment variables will control how your phoenix server runs.
 
 * **PHOENIX\_SQL\_DATABASE\_SCHEMA:** An optional string specifying the PostgreSQL [schema](https://www.postgresql.org/docs/current/ddl-schemas.html) for the database tables. Similar to folders, schemas help organize tables outside the default `public` schema. If the specified schema does not exist, it will be created. This option is ignored when using SQLite.
 
+* **PHOENIX\_DATABASE\_ALLOCATED\_STORAGE\_CAPACITY\_GIBIBYTES:** The amount of database storage Phoenix should treat as total available capacity when evaluating usage thresholds.
+
+* **PHOENIX\_DATABASE\_USAGE\_EMAIL\_WARNING\_THRESHOLD\_PERCENTAGE:** The percentage of allocated database capacity at which Phoenix sends warning emails to admin users. Requires `PHOENIX_DATABASE_ALLOCATED_STORAGE_CAPACITY_GIBIBYTES` and SMTP to be configured.
+
+* **PHOENIX\_DATABASE\_USAGE\_INSERTION\_BLOCKING\_THRESHOLD\_PERCENTAGE:** The percentage of allocated database capacity at which Phoenix stops inserts and updates to protect the database from running out of space. Deletes are still allowed so you can recover space. Requires `PHOENIX_DATABASE_ALLOCATED_STORAGE_CAPACITY_GIBIBYTES`.
+
 * **PHOENIX\_DEFAULT\_RETENTION\_POLICY\_DAYS:** Sets the default retention policy for traces in days. Defaults to 0 (infinite retention). When set to a positive value, traces older than this many days will be automatically removed from the database according to the configured cleanup schedule. This setting affects the default retention policy that applies to all projects unless overridden on a per-project basis through the Phoenix UI. See the [data retention documentation](/docs/phoenix/settings/data-retention) for more details.
 
 * **PHOENIX\_ENABLE\_PROMETHEUS:** Whether to enable Prometheus metrics at port 9090. Defaults to false.
@@ -80,6 +86,18 @@ The following environment variables will control how your phoenix server runs.
 * **PHOENIX\_ENABLE\_STRONG\_PASSWORD\_POLICY:** Enables a stronger password policy. When set to `True`, passwords must meet the following requirements: at least 12 characters, at least one uppercase letter, at least one lowercase letter, at least one number, and at least one special character. Defaults to `False` (minimum 4 characters).
 
 * **PHOENIX\_TELEMETRY\_ENABLED:** Toggle for telemetry (enabled by default). Set to `false` if you want to disable all analytics tracking. Only basic web analytics are collected (e.g., page views, UI interactions). No trace data or sensitive information is ever collected.
+
+### Storage Guardrails
+
+If you set `PHOENIX_DATABASE_ALLOCATED_STORAGE_CAPACITY_GIBIBYTES`, Phoenix can monitor database size against warning and blocking thresholds.
+
+* Use `PHOENIX_DATABASE_USAGE_EMAIL_WARNING_THRESHOLD_PERCENTAGE` to notify admins before space becomes critical.
+* Use `PHOENIX_DATABASE_USAGE_INSERTION_BLOCKING_THRESHOLD_PERCENTAGE` to protect the deployment from running out of space. When this threshold is exceeded, Phoenix returns HTTP `507 Insufficient Storage` for REST write requests and rejects OTLP gRPC writes with `RESOURCE_EXHAUSTED`.
+* Inserts and updates are blocked at the threshold, but deletes are still allowed so you can free space and recover.
+
+<Tip>
+Set the warning threshold lower than the blocking threshold so you have time to clean up old data or expand storage before writes stop.
+</Tip>
 
 ### Logging
 
