@@ -68,6 +68,13 @@ tracer_provider = register(endpoint="http://localhost:9999", protocol="grpc")
 When using the `endpoint` argument, you must specify the fully qualified URL. HTTP uses `/v1/traces`, while gRPC uses port `4317` by default.
 </Info>
 
+<Info>
+If `protocol` is not set, Phoenix infers it from `endpoint`:
+- gRPC: endpoint has no path and uses the configured gRPC port (default `4317`)
+- HTTP/protobuf: endpoint path is exactly `/v1/traces`
+- Otherwise, set `protocol` explicitly
+</Info>
+
 ### Register Options
 
 | Parameter | Description |

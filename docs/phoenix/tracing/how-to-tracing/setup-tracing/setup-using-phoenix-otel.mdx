@@ -100,7 +100,7 @@ Call `register()` to initialize tracing. The SDK automatically reads your enviro
       | `auto_instrument` | Automatically instrument all supported libraries |
       | `batch` | Process spans in batch (default: `False`) |
       | `endpoint` | Custom collector endpoint URL |
-      | `protocol` | Transport protocol: `"grpc"` or `"http/protobuf"` |
+      | `protocol` | Transport protocol: `"grpc"` or `"http/protobuf"`. If omitted, inferred from `endpoint`: **no path + gRPC port** (default `4317`, configurable by `PHOENIX_GRPC_PORT`) uses gRPC; **`/v1/traces`** uses HTTP/protobuf; otherwise set `protocol` explicitly. |
       | `headers` | Headers to send with each span payload |
     </Accordion>
   </Tab>
