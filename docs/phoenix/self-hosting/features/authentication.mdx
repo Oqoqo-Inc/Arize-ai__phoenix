@@ -35,6 +35,16 @@ To enable authentication on your Phoenix, you will have to set two environment v
       <td width="70%">A long string value that is used to sign JWTs for your deployment. It should be a good mix of characters and numbers and should be kept in a secret store of some kind.</td>
       <td width="15%"><code>3413f9a7735bb780c6b8e4db7d946a492b64d26112a955cdea6a797f4c833593</code></td>
     </tr>
+    <tr>
+      <td width="15%"><strong>PHOENIX_ALLOWED_ORIGINS</strong></td>
+      <td width="70%">A comma-separated list of browser origins allowed to make cross-origin requests to Phoenix. Required when your UI or API client is hosted on a different origin than Phoenix; otherwise, login and API calls from that origin will fail CORS checks. Use specific origins such as <code>https://app.example.com,https://dashboard.example.com</code> rather than broad wildcards.</td>
+      <td width="15%"><code>https://app.example.com,https://dashboard.example.com</code></td>
+    </tr>
+    <tr>
+      <td width="15%"><strong>PHOENIX_COOKIES_PATH</strong></td>
+      <td width="70%">The path attribute used when setting Phoenix authentication cookies. Defaults to <code>/</code>. For deployments where Phoenix is served under a subpath behind a reverse proxy (for example, at <code>/phoenix</code>), set this to that subpath so browsers send auth cookies on requests to Phoenix routes; otherwise, login may appear to succeed but subsequent requests will be unauthenticated.</td>
+      <td width="15%"><code>/phoenix</code></td>
+    </tr>
   </tbody>
 </table>
 
