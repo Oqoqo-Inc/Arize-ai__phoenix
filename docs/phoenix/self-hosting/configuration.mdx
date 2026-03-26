@@ -33,6 +33,8 @@ The following environment variables will control how your phoenix server runs.
 
 * **PHOENIX\_HOST\_ROOT\_PATH:** The root path prefix for your application. If provided, allows Phoenix to run behind a reverse proxy at the specified subpath. See an example [here](https://github.com/Arize-ai/phoenix/tree/main/examples/reverse-proxy).
 
+* **PHOENIX\_COOKIES\_PATH:** The path scope applied to all Phoenix authentication cookies. Defaults to `/`, which scopes cookies to the entire host. In reverse-proxy or subpath deployments (for example, when Phoenix is served at `/phoenix` behind a gateway), set this to that subpath (for example, `/phoenix`) so login and refresh cookies are included on browser requests to the UI and APIs.
+
 * **PHOENIX\_WORKING\_DIR:** The directory in which to save, load, and export data. This directory must be accessible by both the Phoenix server and the notebook environment. Defaults to `~/.phoenix/`
 
 * **PHOENIX\_ALLOW\_EXTERNAL\_RESOURCES:** Controls whether external resources (such as Google Fonts) are loaded in the web interface. Defaults to `true`. Set to `false` in air-gapped environments to prevent external requests that can cause UI loading delays. Available since version 11.15.0.
@@ -74,6 +76,8 @@ The following environment variables will control how your phoenix server runs.
 * **PHOENIX\_SERVER\_INSTRUMENTATION\_OTLP\_TRACE\_COLLECTOR\_GRPC\_ENDPOINT:** Specifies an gRPC endpoint for the OTLP trace collector. Specifying this variable enables the OpenTelemetry tracer and exporter for the Phoenix server.
 
 * **PHOENIX\_CSRF\_TRUSTED\_ORIGINS:** A comma-separated list of origins allowed to bypass Cross-Site Request Forgery (CSRF) protection. This setting is recommended when configuring OAuth2 clients or sending password reset emails. If this variable is left unspecified or contains no origins, CSRF protection will not be enabled. In such cases, when a request includes `origin` or `referer` headers, those values will not be validated.
+
+* **PHOENIX\_ALLOWED\_ORIGINS:** A comma-separated list of origins that are allowed to make cross-origin requests to the Phoenix HTTP API and UI. When unset, CORS is disabled and only same-origin browser requests will succeed. Each origin should include scheme, host, and port (for example, `https://app.example.com,https://admin.example.com`). Avoid using overly broad patterns such as `*`, especially with credentialed requests, as they weaken origin security and may be rejected by browsers.
 
 * **PHOENIX\_DEFAULT\_ADMIN\_INITIAL\_PASSWORD:** Sets the initial password for the built-in admin user (email `admin@localhost`) when that account is created on first startup. Defaults to `admin`. Changing this after the default admin already exists has no effect—update the password via the UI or an admin reset instead.
 
