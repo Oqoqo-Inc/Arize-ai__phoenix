@@ -42,6 +42,15 @@ The following environment variables are optional but recommended:
 
 <table data-header-hidden data-full-width="false"><thead><tr><th width="300">Variable</th><th>Description</th></tr></thead><tbody><tr><td><strong>PHOENIX_USE_SECURE_COOKIES</strong></td><td>If set to <strong>True</strong>, access and refresh tokens will be stored in secure cookies. Defaults to <strong>False</strong>.</td></tr><tr><td><strong>PHOENIX_CSRF_TRUSTED_ORIGINS</strong></td><td>A comma-separated list of origins allowed to bypass Cross-Site Request Forgery (CSRF) protection. This setting is recommended when configuring OAuth2 clients or sending password reset emails. If this variable is left unspecified or contains no origins, CSRF protection will not be enabled. In such cases, when a request includes <code>origin</code> or <code>referer</code> headers, those values will not be validated.</td></tr></tbody></table>
 
+### Cross-origin and cookie scope settings
+
+When authentication is enabled and Phoenix is accessed from other browser-based applications or through a reverse proxy, you may also need to configure:
+
+- <strong>PHOENIX_ALLOWED_ORIGINS</strong> – A comma-separated list of browser origins that are allowed to make cross-origin requests to Phoenix. This is required when your Phoenix UI or REST APIs are loaded from a different origin (for example, an internal portal or a separate frontend domain). If the origin is not listed, browsers will block the requests, which can surface as failed logins or broken UI/API calls.
+- <strong>PHOENIX_COOKIES_PATH</strong> – The path attribute for Phoenix authentication cookies. In subpath or reverse-proxy deployments (for example, serving Phoenix at <code>/phoenix</code>), setting this path so it matches the served path ensures that login cookies are sent on subsequent requests. If it is misconfigured, users may be redirected back to the login page because their browser is not sending the auth cookie.
+
+See the <a href="../configuration#environment-variables">Environment Variables</a> reference for full details and defaults.
+
 Deploy Phoenix with the above environment variables set. You will know that you have setup authentication correctly if the UI navigates to to a login screen.
 
 By default Phoenix will create an admin user account. To get started:

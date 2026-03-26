@@ -86,3 +86,11 @@ The following environment variables will control how your phoenix server runs.
 ### Logging
 
 * **PHOENIX\_LOG\_SQL:** Whether to log all SQL statements to stdout. Useful for debugging database queries. Defaults to `false`.
+
+* **PHOENIX\_ALLOWED\_ORIGINS:** A comma-separated list of browser origins allowed to make cross-origin requests to the Phoenix HTTP endpoints. Use this when your Phoenix UI or APIs are accessed from a different origin (for example, an internal portal or a separate frontend domain). Defaults to a restrictive policy suitable for single-origin deployments; setting this too broadly can weaken origin isolation.
+
+* **PHOENIX\_COOKIES\_PATH:** The path attribute used when setting Phoenix authentication cookies. This is especially important when running Phoenix behind a reverse proxy or on a subpath (for example, `/phoenix`). If the cookie path does not match the path where Phoenix is served, login may appear to succeed but subsequent requests will not include the cookie and will be treated as unauthenticated. See **PHOENIX\_HOST\_ROOT\_PATH** for related subpath routing configuration.
+
+### Logging
+
+* **PHOENIX\_LOG\_SQL:** Whether to log all SQL statements to stdout. Useful for debugging database queries. Defaults to `false`.
