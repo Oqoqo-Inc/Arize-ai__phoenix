@@ -75,6 +75,10 @@ The following environment variables will control how your phoenix server runs.
 
 * **PHOENIX\_CSRF\_TRUSTED\_ORIGINS:** A comma-separated list of origins allowed to bypass Cross-Site Request Forgery (CSRF) protection. This setting is recommended when configuring OAuth2 clients or sending password reset emails. If this variable is left unspecified or contains no origins, CSRF protection will not be enabled. In such cases, when a request includes `origin` or `referer` headers, those values will not be validated.
 
+* **PHOENIX\_ALLOWED\_ORIGINS:** A comma-separated list of origins that are allowed to make cross-origin browser requests to the Phoenix server (CORS). If this variable is not set or is empty, cross-origin requests are not allowed and CORS is effectively disabled. When set, only the listed origins are permitted. Values should include scheme and host (for example, `https://phoenix.example.com`). Defaults to `None` (CORS disabled).
+
+* **PHOENIX\_COOKIES\_PATH:** The path scope for authentication cookies issued by Phoenix. Defaults to `/`, which scopes cookies to the entire origin. When running Phoenix behind a reverse proxy or under a subpath (for example, `/phoenix`), set this to the mount path so that login and authenticated requests continue to work correctly.
+
 * **PHOENIX\_DEFAULT\_ADMIN\_INITIAL\_PASSWORD:** Sets the initial password for the built-in admin user (email `admin@localhost`) when that account is created on first startup. Defaults to `admin`. Changing this after the default admin already exists has no effect—update the password via the UI or an admin reset instead.
 
 * **PHOENIX\_ENABLE\_STRONG\_PASSWORD\_POLICY:** Enables a stronger password policy. When set to `True`, passwords must meet the following requirements: at least 12 characters, at least one uppercase letter, at least one lowercase letter, at least one number, and at least one special character. Defaults to `False` (minimum 4 characters).
