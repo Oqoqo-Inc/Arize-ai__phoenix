@@ -83,6 +83,14 @@ The following environment variables will control how your phoenix server runs.
 
 * **PHOENIX\_ALLOWED\_PROVIDERS:** A comma-separated, case-insensitive list of model provider names to display in the playground UI. When unset, all providers are shown. Set to `NONE` to hide all providers. Unrecognized provider names will cause a startup error. Supported values: `OPENAI`, `ANTHROPIC`, `AZURE_OPENAI`, `GOOGLE`, `DEEPSEEK`, `XAI`, `OLLAMA`, `AWS`, `CEREBRAS`, `FIREWORKS`, `GROQ`, `MOONSHOT`, `PERPLEXITY`, `TOGETHER`. Example: `PHOENIX_ALLOWED_PROVIDERS=OPENAI,ANTHROPIC`. Available since version 13.13.0.
 
+### Security
+
+* **PHOENIX\_ALLOWED\_ORIGINS:** A comma-separated list of origins allowed for CORS (Cross-Origin Resource Sharing). When unset (default), CORS is disabled. Configure this when Phoenix needs to accept requests from different origins (e.g., separate frontend and backend deployments). Example: `PHOENIX_ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com`. Available since version 13.4.0.
+
+* **PHOENIX\_COOKIES\_PATH:** Sets the path scope for authentication cookies. Defaults to `/`. In reverse-proxy or subpath deployments (e.g., `example.com/phoenix`), set this to match your deployment path so cookies are sent with all requests. If cookies are not being sent correctly in a subpath deployment, set this to your subpath (e.g., `/phoenix`).
+
+* **PHOENIX\_USE\_SECURE\_COOKIES:** When set to `True`, authentication cookies will have the `Secure` flag, meaning they are only sent over HTTPS. Defaults to `False`. Enable this in production environments that use HTTPS.
+
 ### Logging
 
 * **PHOENIX\_LOG\_SQL:** Whether to log all SQL statements to stdout. Useful for debugging database queries. Defaults to `false`.
