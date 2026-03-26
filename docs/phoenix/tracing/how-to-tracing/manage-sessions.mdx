@@ -1,0 +1,299 @@
+---
+title: "Manage sessions programmatically"
+description: Retrieve, clean up, and annotate sessions via SDKs and REST
+---
+
+Sessions become most powerful once you can work with them programmatically. After you have attached session IDs in your instrumentation and sessions are flowing into Phoenix, you can:
+
+- List sessions for a project
+- Reconstruct the turns (root span input/output) for a given session
+- Delete individual or multiple sessions for cleanup
+- Attach annotations at the session level
+
+This guide shows how to use the Phoenix SDKs and REST API to manage sessions. It assumes you have already [set up sessions](/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-sessions).
+
+## Prerequisites
+
+- Phoenix is running and you can access the UI
+- Sessions are already being logged (for example using `SESSION_ID` span attributes or LangChain `session_id`/`thread_id` metadata)
+- You have installed the Phoenix client in your environment
+
+<Tabs>
+
+  <Tab title="Python" icon="python">
+
+  Install the Python client if you have not already:
+
+  ```bash
+  pip install arize-phoenix
+  ```
+
+  Then create a client:
+
+  ```python
+  from phoenix.client import Client
+
+  client = Client()
+  ```
+
+  </Tab>
+
+  <Tab title="TypeScript" icon="js">
+
+  Install the JS client if you have not already:
+
+  ```bash
+  npm install @arizeai/phoenix-client
+  ```
+
+  Then create a client:
+
+  ```ts
+  import { PhoenixClient } from "@arizeai/phoenix-client";
+
+  const client = new PhoenixClient({
+    baseUrl: process.env.PHOENIX_BASE_URL,
+  });
+  ```
+
+  </Tab>
+
+</Tabs>
+
+## List sessions for a project
+
+Use the sessions APIs to enumerate sessions for a given project. This is useful for building your own dashboards or deciding which sessions to clean up.
+
+<Tabs>
+
+  <Tab title="Python" icon="python">
+
+  ```python
+  from phoenix.client import Client
+
+  client = Client()
+
+  # List sessions for a project by name or ID
+  sessions = client.sessions.list(project_name="my-project")
+
+  for session in sessions:
+      print(session.id, session.created_at)
+  ```
+
+  </Tab>
+
+  <Tab title="TypeScript" icon="js">
+
+  ```ts
+  import { PhoenixClient } from "@arizeai/phoenix-client";
+
+  const client = new PhoenixClient({
+    baseUrl: process.env.PHOENIX_BASE_URL,
+  });
+
+  async function listSessions() {
+    const sessions = await client.sessions.listSessions({
+      projectName: "my-project",
+    });
+
+    for (const session of sessions) {
+      console.log(session.id, session.createdAt);
+    }
+  }
+  ```
+
+  </Tab>
+
+</Tabs>
+
+## Reconstruct session turns
+
+To analyze a full conversation, you often want to reconstruct the ordered turns (root spans) that make up a session. The Phoenix clients expose helpers that do this for you.
+
+<Tabs>
+
+  <Tab title="Python" icon="python">
+
+  ```python
+  from phoenix.client import Client
+
+  client = Client()
+
+  session_id = "<your-session-id>"
+
+  turns = client.sessions.get_session_turns(session_id=session_id)
+
+  for turn in turns:
+      # turn.input and turn.output depend on your tracing setup
+      print(f"{turn.start_time}: {turn.input} -> {turn.output}")
+  ```
+
+  </Tab>
+
+  <Tab title="TypeScript" icon="js">
+
+  ```ts
+  import { PhoenixClient } from "@arizeai/phoenix-client";
+
+  const client = new PhoenixClient({
+    baseUrl: process.env.PHOENIX_BASE_URL,
+  });
+
+  async function showSessionTurns(sessionId: string) {
+    const turns = await client.sessions.getSessionTurns({
+      sessionId,
+    });
+
+    for (const turn of turns) {
+      console.log(`${turn.startTime}:`, turn.input, "->", turn.output);
+    }
+  }
+  ```
+
+  </Tab>
+
+</Tabs>
+
+Under the hood, these helpers use the Phoenix REST APIs to fetch the root spans for the session and handle pagination for you.
+
+## Delete sessions
+
+You can delete sessions when you no longer need them — for example when cleaning up test data. Deletion is permanent; deleted sessions and their associated data cannot be recovered.
+
+<Tabs>
+
+  <Tab title="Python" icon="python">
+
+  ```python
+  from phoenix.client import Client
+
+  client = Client()
+
+  # Delete a single session
+  client.sessions.delete(session_id="<session-id>")
+
+  # Delete multiple sessions in bulk
+  client.sessions.bulk_delete(
+      session_ids=["<session-id-1>", "<session-id-2>"],
+  )
+  ```
+
+  </Tab>
+
+  <Tab title="TypeScript" icon="js">
+
+  ```ts
+  import { PhoenixClient } from "@arizeai/phoenix-client";
+
+  const client = new PhoenixClient({
+    baseUrl: process.env.PHOENIX_BASE_URL,
+  });
+
+  async function cleanupSessions(sessionIds: string[]) {
+    // Delete a single session
+    await client.sessions.deleteSession({
+      sessionId: sessionIds[0],
+    });
+
+    // Delete multiple sessions at once
+    await client.sessions.deleteSessions({
+      sessionIds,
+    });
+  }
+  ```
+
+  </Tab>
+
+</Tabs>
+
+For HTTP-level details (status codes, error responses, and request bodies), see the [sessions REST API reference](/docs/phoenix/sdk-api-reference/rest-api/api-reference/sessions).
+
+## Log session annotations
+
+Session annotations let you attach structured labels or notes to an entire session (for example, whether the conversation resolved the user issue, or what persona was used).
+
+<Tabs>
+
+  <Tab title="Python" icon="python">
+
+  ```python
+  from phoenix.client import Client
+  from phoenix.client.types import SessionAnnotationData
+
+  client = Client()
+
+  annotations = [
+      SessionAnnotationData(
+          session_id="<session-id>",
+          name="resolution",
+          value="resolved",
+      ),
+  ]
+
+  # Log annotations; set sync=True to wait for completion
+  client.sessions.log_session_annotations(
+      session_annotations=annotations,
+      sync=True,
+  )
+  ```
+
+  If you already have annotations in a Pandas DataFrame, you can use `log_session_annotations_dataframe` (requires Phoenix server version >= 12.0.0):
+
+  ```python
+  import pandas as pd
+  from phoenix.client import Client
+
+  client = Client()
+
+  df = pd.DataFrame(
+      [
+          {
+              "session_id": "<session-id>",
+              "name": "resolution",
+              "value": "resolved",
+          },
+      ]
+  )
+
+  client.sessions.log_session_annotations_dataframe(
+      dataframe=df,
+      annotation_name="resolution",
+      sync=True,
+  )
+  ```
+
+  </Tab>
+
+  <Tab title="TypeScript" icon="js">
+
+  ```ts
+  import { PhoenixClient } from "@arizeai/phoenix-client";
+
+  const client = new PhoenixClient({
+    baseUrl: process.env.PHOENIX_BASE_URL,
+  });
+
+  async function logAnnotations() {
+    await client.sessions.logSessionAnnotations({
+      annotations: [
+        {
+          sessionId: "<session-id>",
+          name: "resolution",
+          value: "resolved",
+        },
+      ],
+    });
+  }
+  ```
+
+  </Tab>
+
+</Tabs>
+
+## Related reference
+
+- [Setup Sessions](/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-sessions)
+- [Sessions concept page](/docs/phoenix/tracing/llm-traces/sessions)
+- [Sessions REST API reference](/docs/phoenix/sdk-api-reference/rest-api/api-reference/sessions)
+- Python client: `Sessions` and `AsyncSessions` classes in the `phoenix.client` reference
+- JS client: sessions APIs in `@arizeai/phoenix-client`
