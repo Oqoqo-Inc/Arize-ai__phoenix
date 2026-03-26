@@ -42,6 +42,12 @@ The following environment variables are optional but recommended:
 
 <table data-header-hidden data-full-width="false"><thead><tr><th width="300">Variable</th><th>Description</th></tr></thead><tbody><tr><td><strong>PHOENIX_USE_SECURE_COOKIES</strong></td><td>If set to <strong>True</strong>, access and refresh tokens will be stored in secure cookies. Defaults to <strong>False</strong>.</td></tr><tr><td><strong>PHOENIX_CSRF_TRUSTED_ORIGINS</strong></td><td>A comma-separated list of origins allowed to bypass Cross-Site Request Forgery (CSRF) protection. This setting is recommended when configuring OAuth2 clients or sending password reset emails. If this variable is left unspecified or contains no origins, CSRF protection will not be enabled. In such cases, when a request includes <code>origin</code> or <code>referer</code> headers, those values will not be validated.</td></tr></tbody></table>
 
+### Deployment considerations
+
+When Phoenix is accessed from a different origin than where the server is hosted (for example, behind a separate reverse proxy or UI domain), use <code>PHOENIX_ALLOWED_ORIGINS</code> to configure which browser origins are allowed to make cross-origin requests to Phoenix. Set this to the exact origins of your UI or proxy and avoid overly broad values like <code>*</code> in production. See the <strong>Server Configuration</strong> section of the self-hosting configuration page for full details.
+
+If Phoenix is served under a subpath (for example, with <code>PHOENIX_HOST_ROOT_PATH=/phoenix</code> behind a reverse proxy), set <code>PHOENIX_COOKIES_PATH</code> to the same subpath (for example, <code>/phoenix</code>) so that authentication cookies are sent with application requests. If this is left at <code>/</code> or set incorrectly, users may experience repeated login prompts or redirect loops because cookies are not attached to subpath requests.
+
 Deploy Phoenix with the above environment variables set. You will know that you have setup authentication correctly if the UI navigates to to a login screen.
 
 By default Phoenix will create an admin user account. To get started:
