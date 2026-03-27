@@ -17,6 +17,8 @@ Each `SessionTurn` corresponds to a single trace and contains the root span's in
 - **Batched root span fetching** with pagination to handle large sessions (up to 50 trace IDs per batch)
 - **Async variants** — `async_client.sessions.get_session_turns()` (Python) and the same `getSessionTurns()` function (TypeScript, natively async)
 
+For an end-to-end guide to reconstructing turns with the client SDKs, see the [Setup Sessions how-to](/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-sessions).
+
 **Python example:**
 
 ```python
@@ -54,6 +56,8 @@ March 10, 2026
 **Available in arize-phoenix 13.13.0+ (server), arize-phoenix-client 1.31.0+ (Python), @arizeai/phoenix-client 6.1.0+ (TypeScript)**
 
 Phoenix now exposes comprehensive session management through REST API endpoints on the server. Retrieve individual sessions, list sessions with pagination and project filtering, and delete sessions with cascading cleanup of associated traces, spans, and annotations.
+
+For workflow-oriented examples (querying, turns reconstruction, and deletion), see the [Setup Sessions how-to](/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-sessions).
 
 REST endpoints added to the server:
 - `GET /v1/sessions/{session_id}` — retrieve a single session by ID or GlobalID
