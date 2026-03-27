@@ -674,6 +674,188 @@ Finally, log all session annotations to Phoenix:
 
 Now that we've ran our session level evaluators, let's see how our support bot performs across user sessions.
 
+# Programmatic Session APIs
+
+Sessions are first-class resources in Phoenix. In addition to the Sessions UI, you can use the Python and TypeScript clients to:
+
+- Reconstruct the ordered turns in a session
+- Delete sessions (individually or in bulk)
+- Log and update session-level annotations
+
+These APIs build on the semantic conventions you used earlier in this tutorial (`input.value`, `output.value`, and `session.id`).
+
+## Reconstructing Session Turns
+
+Use the session turns API to rebuild a conversation transcript directly from Phoenix, instead of relying on your application logs.
+
+<Tabs>
+  <Tab title="Python" icon="python">
+
+```python
+from phoenix.client import Client
+
+client = Client()
+
+turns = client.sessions.get_session_turns(session_id="my-session-id")
+
+for turn in turns:
+    input_val = turn.get("input", {}).get("value", "<no input>")
+    output_val = turn.get("output", {}).get("value", "<no output>")
+    print(f"Turn (trace={turn['trace_id']}): {input_val} → {output_val}")
+```
+
+  </Tab>
+  <Tab title="TypeScript" icon="js">
+
+```ts
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session-id" });
+
+for (const turn of turns) {
+  console.log(`[${turn.startTime}] Input: ${turn.input?.value}`);
+  console.log(`[${turn.startTime}] Output: ${turn.output?.value}`);
+}
+```
+
+  </Tab>
+</Tabs>
+
+Key details:
+
+- Turns are ordered chronologically by the underlying trace start time.
+- Phoenix uses the root span's `input.value` and `output.value` attributes to reconstruct each turn.
+- If those attributes are missing, the `input`/`output` fields may be empty for that turn.
+
+<Info>
+The session turns API is experimental and may change in future releases. See the Session Turns API release note for version requirements.
+</Info>
+
+## Deleting Sessions
+
+When you run experiments or collect test data, you may want to remove sessions and their traces after you're done. Phoenix exposes deletion APIs in both clients.
+
+<Tabs>
+  <Tab title="Python" icon="python">
+
+```python
+from phoenix.client import Client
+
+client = Client()
+
+# Delete a single session
+client.sessions.delete(session_id="my-session-id")
+
+# Bulk delete multiple sessions
+client.sessions.bulk_delete(session_ids=["session-1", "session-2", "session-3"])
+```
+
+  </Tab>
+  <Tab title="TypeScript" icon="js">
+
+```ts
+import { deleteSession, deleteSessions } from "@arizeai/phoenix-client/sessions";
+
+// Delete a single session
+await deleteSession({ sessionId: "my-session-id" });
+
+// Bulk delete multiple sessions
+await deleteSessions({ sessionIds: ["session-1", "session-2", "session-3"] });
+```
+
+  </Tab>
+</Tabs>
+
+<Warning>
+Deleting a session is a cascading operation. When a session is deleted, all associated traces, spans, and session annotations are permanently removed. Use bulk delete carefully in production environments.
+</Warning>
+
+Behavior to keep in mind:
+
+- All identifiers in a bulk delete call must be the same type (either all Phoenix GlobalIDs or all user-provided session IDs).
+- Non-existent IDs are safely ignored in bulk deletes.
+- Session deletion requires recent Phoenix server versions; see the release notes for exact version numbers.
+
+## Logging Session Annotations Programmatically
+
+Earlier in this tutorial you logged session-level annotations from an evaluation job. You can also log or update annotations directly using the client APIs.
+
+<Tabs>
+  <Tab title="TypeScript" icon="js">
+
+```ts
+import { logSessionAnnotations } from "@arizeai/phoenix-client/sessions";
+
+await logSessionAnnotations({
+  sessionAnnotations: [
+    {
+      sessionId: "my-session-id",
+      name: "conversation_coherence",
+      label: "coherent",
+      score: 0.95,
+      annotatorKind: "LLM",
+      metadata: { model: "gpt-5", turnCount: 6 },
+    },
+    {
+      sessionId: "my-session-id",
+      name: "resolution_status",
+      label: "resolved",
+      score: 1.0,
+      annotatorKind: "LLM",
+      metadata: { model: "gpt-5", turnCount: 6 },
+    },
+  ],
+  // Set sync to true to wait for IDs
+  sync: false,
+});
+```
+
+  </Tab>
+  <Tab title="Python" icon="python">
+
+```python
+from phoenix.client import Client
+from phoenix.client.resources.sessions import SessionAnnotationData
+
+client = Client()
+
+session_annotations = [
+    SessionAnnotationData(
+        session_id="my-session-id",
+        name="conversation_coherence",
+        annotator_kind="LLM",
+        result={"label": "coherent", "score": 0.95},
+        metadata={"model": "gpt-5", "turnCount": 6},
+    ),
+    SessionAnnotationData(
+        session_id="my-session-id",
+        name="resolution_status",
+        annotator_kind="LLM",
+        result={"label": "resolved", "score": 1.0},
+        metadata={"model": "gpt-5", "turnCount": 6},
+    ),
+]
+
+client.sessions.log_session_annotations(
+    session_annotations=session_annotations,
+    sync=False,
+)
+```
+
+  </Tab>
+</Tabs>
+
+Notes:
+
+- An annotation must include at least a label or a score to be useful.
+- Use the `metadata` field to capture context like model name, dataset slice, or experiment ID.
+- Use a stable `identifier` when you want to update an existing annotation instead of creating a new one.
+
+For more details on the underlying REST endpoints and full parameter reference, see:
+
+- [Sessions REST API overview](/docs/phoenix/sdk-api-reference/rest-api/api-reference/sessions)
+- [Session Turns API release notes](/docs/phoenix/release-notes/03-2026/03-11-2026-session-turns-api)
+
 <video controls className="w-full aspect-video rounded-xl" src="https://storage.googleapis.com/arize-phoenix-assets/assets/images/session-evals.mp4" />
 
 **Turn 1**: The user asks about order ORD-67890. The agent correctly looks up the order and reports it's processing with a December 15 ETA.

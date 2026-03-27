@@ -10,6 +10,8 @@ March 11, 2026
 
 Phoenix now provides a dedicated session turns API that reconstructs the ordered input/output pairs across all traces in a session. The new `get_session_turns()` method (Python) and `getSessionTurns()` function (TypeScript) fetch all traces within a session, extract root span `input.value` / `output.value` attributes (per OpenInference semantic conventions), and return chronologically ordered `SessionTurn` objects.
 
+For end-to-end examples of using these APIs to rebuild transcripts and manage sessions, see the [Sessions tutorial](/docs/phoenix/tracing/tutorial/sessions#programmatic-session-apis).
+
 Each `SessionTurn` corresponds to a single trace and contains the root span's input and output as `SessionTurnIO` objects (with `value` and optional `mime_type`). This API is **experimental** and may change in future releases.
 
 - **Chronological turn ordering** from session traces sorted by `start_time`
