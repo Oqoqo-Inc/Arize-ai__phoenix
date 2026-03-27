@@ -103,10 +103,10 @@ The `getPrompt` function can be used to pull a prompt from Phoenix based on some
 ```ts
 import { getPrompt } from "@arizeai/phoenix-client/prompts";
 
-const prompt = await getPrompt({ name: "my-prompt" });
+const prompt = await getPrompt({ prompt: { name: "my-prompt" } });
 // ^ you now have a strongly-typed prompt object, in the Phoenix SDK Prompt type
 
-const promptByTag = await getPrompt({ tag: "production", name: "my-prompt" });
+const promptByTag = await getPrompt({ prompt: { tag: "production", name: "my-prompt" } });
 // ^ you can optionally specify a tag to filter by
 
 const promptByVersionId = await getPrompt({
@@ -133,7 +133,7 @@ import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { getPrompt, toSDK } from "@arizeai/phoenix-client/prompts";
 
-const prompt = await getPrompt({ name: "my-prompt" });
+const prompt = await getPrompt({ prompt: { name: "my-prompt" } });
 const promptAsAI = toSDK({
   sdk: "ai",
   // ^ the SDK you want to convert the prompt to, supported SDKs are listed above
