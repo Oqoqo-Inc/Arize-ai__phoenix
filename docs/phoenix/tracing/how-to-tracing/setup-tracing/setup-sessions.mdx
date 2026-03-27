@@ -185,6 +185,99 @@ You can then click into a given session. This will open the history of a particu
   <img src="https://storage.googleapis.com/arize-phoenix-assets/assets/images/phoenix-docs-images/8afa6160-image.jpeg" />
 </Frame>
 
+## Reconstruct conversations programmatically
+
+Once you are logging traces with a session identifier, you can reconstruct the ordered turns of a conversation directly from Phoenix.
+
+<Tabs>
+
+  <Tab title="Python" icon="python">
+
+  ```python
+  from phoenix.client import Client
+
+  client = Client()
+
+  # List recent sessions in a project
+  sessions = client.sessions.list(project_name="default", limit=5)
+  target = sessions[0]["session_id"]
+
+  # Get the ordered turns for a session
+  turns = client.sessions.get_session_turns(session_id=target)
+  for turn in turns:
+      input_val = turn.get("input", {}).get("value", "<no input>")
+      output_val = turn.get("output", {}).get("value", "<no output>")
+      print(f"Turn (trace={turn['trace_id']}): {input_val} -> {output_val}")
+  ```
+
+  </Tab>
+
+  <Tab title="TypeScript" icon="js">
+
+  ```ts
+  import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+  const turns = await getSessionTurns({ sessionId: "my-session" });
+  for (const turn of turns) {
+    console.log(`[${turn.startTime}] Input: ${turn.input?.value}`);
+    console.log(`[${turn.startTime}] Output: ${turn.output?.value}`);
+  }
+  ```
+
+  </Tab>
+
+</Tabs>
+
+<Note>
+The Session Turns API is experimental and requires recent Phoenix versions. See the Session Turns release notes for version requirements and additional details.
+</Note>
+
+## Managing and deleting sessions
+
+You can also manage the lifecycle of sessions from code for cleanup and privacy workflows.
+
+<Tabs>
+
+  <Tab title="Python" icon="python">
+
+  ```python
+  from phoenix.client import Client
+
+  client = Client()
+
+  # Delete a single session and its associated traces/spans/annotations
+  client.sessions.delete(session_id="my-session")
+
+  # Bulk delete multiple sessions
+  client.sessions.bulk_delete(session_ids=["session-1", "session-2"])
+  ```
+
+  </Tab>
+
+  <Tab title="TypeScript" icon="js">
+
+  ```ts
+  import {
+    getSession,
+    listSessions,
+    deleteSession,
+  } from "@arizeai/phoenix-client/sessions";
+
+  // List sessions in a project
+  const { sessions } = await listSessions({ project: "default" });
+
+  // Delete a session by ID
+  await deleteSession({ sessionId: "my-session" });
+  ```
+
+  </Tab>
+
+</Tabs>
+
+<Warning>
+Deleting a session cascades to its related traces, spans, and annotations. Use bulk deletion carefully, especially in production projects. See the Sessions REST API reference for endpoint details and server version requirements.
+</Warning>
+
 ## How to track sessions with LangChain
 
 For LangChain, in order to log runs as part of the same thread you need to pass a special metadata key to the run. The key value is the unique identifier for that conversation. The key name should be one of:

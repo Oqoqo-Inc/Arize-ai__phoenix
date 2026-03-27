@@ -21,6 +21,16 @@ With Sessions in Phoenix, you can:
 
 This feature is particularly valuable for applications where context builds over time, like chatbots, virtual assistants, or any other multi-turn interaction. By tagging spans with a consistent session ID, you create a connected view that reveals how your application performs across an entire user journey.
 
+## Working with sessions programmatically
+
+Beyond viewing sessions in the Phoenix UI, you can:
+
+* Reconstruct the ordered turns in a session using the Session Turns API (`client.sessions.get_session_turns()` in Python, `getSessionTurns()` in TypeScript).
+* List, fetch, and delete sessions (individually or in bulk) using the Sessions REST API and client SDK wrappers.
+* Log and query session-level annotations for downstream analysis.
+
+See the Sessions setup guide for end-to-end examples and the Sessions REST API reference for full endpoint and parameter details.
+
 ## Next Steps
 
 <CardGroup cols={2}>
