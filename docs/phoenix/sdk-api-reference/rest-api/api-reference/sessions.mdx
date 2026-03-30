@@ -3,3 +3,81 @@ title: "Sessions"
 sidebarTitle: "Overview"
 description: "REST API methods for interacting with Phoenix sessions"
 ---
+
+Phoenix exposes REST endpoints for working with sessions. Sessions group related traces from a conversation into a single timeline.
+
+## Get a session
+
+`GET /v1/sessions/{session_id}`
+
+Retrieve a single session by its identifier or Phoenix GlobalID.
+
+### Path parameters
+
+- `session_id` — Session identifier or GlobalID.
+
+### Response
+
+Returns a JSON object describing the session, including its traces.
+
+## List sessions for a project
+
+`GET /v1/projects/{project}/sessions`
+
+List sessions for a given project using cursor-based pagination.
+
+### Path parameters
+
+- `project` — Project name or identifier.
+
+### Query parameters
+
+- `cursor` — Optional cursor token for pagination.
+- `limit` — Optional maximum number of sessions to return.
+
+### Response
+
+Returns a JSON object containing:
+
+- `sessions` — Array of session objects.
+- `nextCursor` — Cursor for the next page, if any.
+
+## Delete a session
+
+`DELETE /v1/sessions/{session_id}`
+
+Delete a single session and cascade delete its associated traces, spans, and annotations.
+
+### Path parameters
+
+- `session_id` — Session identifier or GlobalID.
+
+### Response
+
+Returns a 204 status code on success.
+
+## Bulk delete sessions
+
+`POST /v1/sessions/delete`
+
+Bulk delete multiple sessions in a single request.
+
+### Request body
+
+```json
+{
+  "session_ids": ["session-1", "session-2"]
+}
+```
+
+All identifiers in the list must be of the same type (either user-provided session IDs or Phoenix GlobalIDs). Non-existent IDs are skipped.
+
+### Response
+
+Returns a 204 status code on success.
+
+<Note>
+Session deletions are irreversible and cascade to all associated traces, spans, and annotations. Use bulk deletes carefully, especially when automating cleanup jobs.
+</Note>
+
+For higher-level examples using these endpoints through the Phoenix clients, see the Python and TypeScript sessions SDK reference pages.

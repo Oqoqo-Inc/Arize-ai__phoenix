@@ -296,6 +296,43 @@ for (const session of sessions) {
 }
 ```
 
+### Get session turns
+
+```ts
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session" });
+
+for (const turn of turns) {
+  console.log(`[${turn.startTime}] Input: ${turn.input?.value}`);
+  console.log(`[${turn.startTime}] Output: ${turn.output?.value}`);
+}
+```
+
+The `getSessionTurns` function reconstructs ordered conversation turns for a session by reading the input and output values from the root span of each trace.
+
+### Delete sessions
+
+```ts
+import { deleteSession } from "@arizeai/phoenix-client/sessions";
+
+// Delete a single session (cascades to traces, spans, and annotations)
+await deleteSession({ sessionId: "my-session" });
+```
+
+### Bulk delete sessions
+
+```ts
+import { deleteSessions } from "@arizeai/phoenix-client/sessions";
+
+// Bulk delete multiple sessions
+await deleteSessions({ sessionIds: ["session-1", "session-2"] });
+```
+
+When performing bulk deletes, all identifiers in the list must be of the same type (either user-provided session IDs or Phoenix GlobalIDs). Non-existent IDs are skipped.
+
+> Note: session management (get, list, delete, bulk delete) is available in `@arizeai/phoenix-client` 6.1.0+; the Session Turns API is available in 6.4.0+.
+
 ## Compatibility
 
 This package utilizes [openapi-ts](https://openapi-ts.pages.dev/) to generate types from the Phoenix OpenAPI spec.

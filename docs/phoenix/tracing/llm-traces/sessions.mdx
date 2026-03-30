@@ -21,15 +21,24 @@ With Sessions in Phoenix, you can:
 
 This feature is particularly valuable for applications where context builds over time, like chatbots, virtual assistants, or any other multi-turn interaction. By tagging spans with a consistent session ID, you create a connected view that reveals how your application performs across an entire user journey.
 
+Beyond viewing conversations in the Phoenix UI, you can also use the Phoenix client libraries and REST API to query sessions, reconstruct the ordered turns in a conversation, and clean up sessions when they are no longer needed.
+
 ## Next Steps
 
 <CardGroup cols={2}>
   <Card title="Setup Sessions" icon="gear" href="/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-sessions">
-    Configure session tracking in your application
+    Configure, query, and manage sessions in your application
   </Card>
   <Card title="Setup Projects" icon="folder" href="/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-projects">
     Organize traces into separate projects
   </Card>
 </CardGroup>
 
+## What you can do with sessions programmatically
+
+- Reconstruct ordered conversation turns for a session using the Session Turns API in the Python and TypeScript clients.
+- Query and export sessions for a project using client sessions helpers and the REST API.
+- Manage and clean up sessions with single and bulk delete methods, and attach annotations at the session level for evaluation and feedback workflows.
+
+For full API details, see the Python and TypeScript SDK references for sessions and the REST sessions API reference.
 

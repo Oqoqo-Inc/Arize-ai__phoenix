@@ -185,6 +185,82 @@ You can then click into a given session. This will open the history of a particu
   <img src="https://storage.googleapis.com/arize-phoenix-assets/assets/images/phoenix-docs-images/8afa6160-image.jpeg" />
 </Frame>
 
+## Reconstructing conversations with the Session Turns API
+
+Once you are logging sessions, you can use the Phoenix clients to reconstruct the ordered input/output turns for a session. The Session Turns API looks at the root span for each trace in the session and reads the `input.value` and `output.value` attributes (from the OpenInference semantic conventions) to build a conversation timeline.
+
+<Note>
+To reconstruct turns, make sure your instrumentation sets `SpanAttributes.INPUT_VALUE` and `SpanAttributes.OUTPUT_VALUE` on the root span of each trace in the session, as in the examples above.
+</Note>
+
+**Python**
+
+```python
+from phoenix.client import Client
+
+client = Client()
+turns = client.sessions.get_session_turns(session_id="my-session")
+
+for turn in turns:
+    input_value = turn.get("input", {}).get("value", "<no input>")
+    output_value = turn.get("output", {}).get("value", "<no output>")
+    print(f"Turn ({turn['trace_id']}): {input_value} -> {output_value}")
+```
+
+**TypeScript**
+
+```ts
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session" });
+
+for (const turn of turns) {
+  console.log(`[${turn.startTime}] Input: ${turn.input?.value}`);
+  console.log(`[${turn.startTime}] Output: ${turn.output?.value}`);
+}
+```
+
+<Warning>
+The Session Turns API is experimental and may change in future releases. It is available in `arize-phoenix-client` 2.0.0+ (Python) and `@arizeai/phoenix-client` 6.4.0+ (TypeScript).
+</Warning>
+
+## Managing and cleaning up sessions
+
+As your application runs in production, you may create many sessions. You can use the clients to delete individual sessions or bulk delete multiple sessions when they are no longer needed.
+
+**Python**
+
+```python
+from phoenix.client import Client
+
+client = Client()
+
+# Delete a single session (cascades to traces, spans, and annotations)
+client.sessions.delete(session_id="my-session")
+
+# Bulk delete multiple sessions
+client.sessions.bulk_delete(session_ids=["session-1", "session-2"])
+```
+
+**TypeScript**
+
+```ts
+import {
+  deleteSession,
+  deleteSessions,
+} from "@arizeai/phoenix-client/sessions";
+
+// Delete a single session (cascades to traces, spans, and annotations)
+await deleteSession({ sessionId: "my-session" });
+
+// Bulk delete multiple sessions
+await deleteSessions({ sessionIds: ["session-1", "session-2"] });
+```
+
+<Warning>
+Session deletions are irreversible and cascade to all associated traces, spans, and annotations. When using bulk delete, make sure all identifiers in the list are of the same type (either user-provided session IDs or Phoenix GlobalIDs).
+</Warning>
+
 ## How to track sessions with LangChain
 
 For LangChain, in order to log runs as part of the same thread you need to pass a special metadata key to the run. The key value is the unique identifier for that conversation. The key name should be one of:

@@ -284,6 +284,40 @@ df = client.sessions.get_sessions_dataframe(project_name="my-chatbot")
 print(df[["session_id", "start_time", "end_time", "num_traces"]])
 ```
 
+### Get session turns
+
+```python
+from phoenix.client import Client
+
+client = Client()
+turns = client.sessions.get_session_turns(session_id="my-session")
+
+for turn in turns:
+    input_value = turn.get("input", {}).get("value", "<no input>")
+    output_value = turn.get("output", {}).get("value", "<no output>")
+    print(f"Turn ({turn['trace_id']}): {input_value} -> {output_value}")
+```
+
+The `get_session_turns` method reconstructs ordered conversation turns for a session by reading `input.value` and `output.value` from the root span of each trace. Each turn includes the trace identifier, input and output payloads, and timing information.
+
+> Note: `get_session_turns` is experimental and available in `arize-phoenix-client` 2.0.0+.
+
+### Delete sessions
+
+```python
+# Delete a single session (cascades to traces, spans, and annotations)
+client.sessions.delete(session_id="my-session")
+```
+
+### Bulk delete sessions
+
+```python
+# Bulk delete multiple sessions
+client.sessions.bulk_delete(session_ids=["session-1", "session-2"])
+```
+
+When performing bulk deletes, all identifiers in the list must be of the same type (either user-provided session IDs or Phoenix GlobalIDs). Non-existent IDs are skipped.
+
 ### Async Usage
 
 ```python
@@ -294,6 +328,8 @@ async_client = AsyncClient()
 session = await async_client.sessions.get(session_id="my-session-id")
 sessions = await async_client.sessions.list(project_name="my-chatbot", limit=10)
 df = await async_client.sessions.get_sessions_dataframe(project_name="my-chatbot")
+
+turns = await async_client.sessions.get_session_turns(session_id="my-session")
 ```
 
 ---
