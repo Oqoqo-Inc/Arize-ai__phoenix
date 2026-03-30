@@ -296,6 +296,51 @@ for (const session of sessions) {
 }
 ```
 
+### Get Session Turns (experimental)
+
+```ts
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session-id" });
+for (const turn of turns) {
+  console.log(`[${turn.startTime}]`, turn.input?.value, "->", turn.output?.value);
+}
+```
+
+### Delete Sessions
+
+```ts
+import { deleteSession, deleteSessions } from "@arizeai/phoenix-client/sessions";
+
+// Delete a single session (cascades to traces, spans, and annotations)
+await deleteSession({ sessionId: "my-session-id" });
+
+// Bulk delete multiple sessions
+await deleteSessions({ sessionIds: ["session-1", "session-2"] });
+```
+
+### Log Session Annotations
+
+```ts
+import { logSessionAnnotations } from "@arizeai/phoenix-client/sessions";
+
+await logSessionAnnotations({
+  sessionAnnotations: [
+    {
+      sessionId: "my-session-id",
+      name: "resolution",
+      label: "resolved",
+      annotatorKind: "HUMAN",
+    },
+  ],
+});
+```
+
+<Note>
+Session deletion and bulk deletion require arize-phoenix server 13.13.0+ and compatible client versions. `getSessionTurns` and `logSessionAnnotations` are available in @arizeai/phoenix-client 6.4.0+.
+
+</Note>
+
 ## Compatibility
 
 This package utilizes [openapi-ts](https://openapi-ts.pages.dev/) to generate types from the Phoenix OpenAPI spec.
