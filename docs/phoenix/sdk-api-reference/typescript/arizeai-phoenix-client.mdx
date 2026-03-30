@@ -261,7 +261,7 @@ const experiment = await runExperiment({
 
 ## Sessions
 
-Retrieve session data for multi-turn conversations. Sessions group related traces from a conversation into a single timeline.
+Retrieve and manage multi-turn conversations. Sessions group related traces from aconversation into a single timeline.
 
 ### Get a Session
 
@@ -295,6 +295,43 @@ for (const session of sessions) {
   console.log(`${session.sessionId}: ${session.traces.length} traces`);
 }
 ```
+
+### Get Session Turns
+
+```ts
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session" });
+for (const turn of turns) {
+  const input = turn.input?.value ?? "<no input>";
+  const output = turn.output?.value ?? "<no output>";
+  console.log(`[${turn.startTime}] ${input} -> ${output}`);
+}
+```
+
+### Delete Sessions
+
+```ts
+import { deleteSession, deleteSessions } from "@arizeai/phoenix-client/sessions";
+
+// Delete a single session (and its traces, spans, and annotations)
+await deleteSession({ sessionId: "my-session" });
+
+// Bulk delete multiple sessions
+await deleteSessions({ sessionIds: ["session-1", "session-2"] });
+```
+
+<Warning>
+Deleting sessions is irreversible and cascades to all associated traces, spans, and annotations. Use bulk deletion carefully in production environments.
+</Warning>
+
+### Reference
+
+- `getSession(options: { sessionId: string; client?: PhoenixClient })` — retrieve a single session
+- `listSessions(options: { projectName?: string; projectId?: string; project?: string; client?: PhoenixClient })` — list sessions for a project
+- `getSessionTurns(options: { sessionId: string; client?: PhoenixClient })` — reconstruct the ordered turns for a session
+- `deleteSession(options: { sessionId: string; client?: PhoenixClient })` — delete a single session
+- `deleteSessions(options: { sessionIds: string[]; client?: PhoenixClient })` — delete multiple sessions at once
 
 ## Compatibility
 

@@ -32,4 +32,77 @@ This feature is particularly valuable for applications where context builds over
   </Card>
 </CardGroup>
 
+## Session lifecycle APIs
+
+Once you've started logging sessions, Phoenix exposes APIs to help you work with complete conversations, not just individual traces.
+
+### Reconstruct conversations from session turns
+
+Phoenix can rebuild an ordered list of "turns" for a session by walking all traces in the session and extracting the root span's input and output.
+
+Each turn corresponds to a single trace and includes:
+
+- the trace identifier and timing
+- the root span
+- input and output values (with MIME types when available)
+
+```python
+from phoenix.client import Client
+
+client = Client()
+
+turns = client.sessions.get_session_turns(session_id="my-session")
+for turn in turns:
+    input_val = turn.get("input", {}).get("value", "<no input>")
+    output_val = turn.get("output", {}).get("value", "<no output>")
+    print(f"{turn['start_time']}: {input_val} -> {output_val}")
+```
+
+```ts
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session" });
+for (const turn of turns) {
+  console.log(`${turn.startTime}: ${turn.input?.value} -> ${turn.output?.value}`);
+}
+```
+
+Turns are returned in chronological order based on the root span start time, so you can render a transcript or feed the conversation into evaluators.
+
+### Programmatic session cleanup
+
+Sessions often contain sensitive data and can add up quickly in active environments. Use the SDKs to clean up individual sessions or batches once you no longer need them.
+
+```python
+from phoenix.client import Client
+
+client = Client()
+
+# Delete a single session (and its traces, spans, and annotations)
+client.sessions.delete(session_id="my-session")
+
+# Bulk delete multiple sessions
+client.sessions.bulk_delete(session_ids=["session-1", "session-2"])
+```
+
+```ts
+import { deleteSession, deleteSessions } from "@arizeai/phoenix-client/sessions";
+
+// Delete a single session
+await deleteSession({ sessionId: "my-session" });
+
+// Bulk delete by ID
+await deleteSessions({ sessionIds: ["session-1", "session-2"] });
+```
+
+<Warning>
+Deleting a session is irreversible and cascades to all associated traces, spans, and annotations. Use bulk deletion thoughtfully in production and consider retaining sessions needed for compliance or audit.
+</Warning>
+
+### Session-level annotations
+
+In addition to span-level annotations, Phoenix supports annotations attached to an entire session. You can use these to record judgments like "conversation_coherence" or "resolution_status" for each conversation and then filter or slice by those labels in the UI.
+
+See the session evaluation examples later in this tutorial and the SDK reference pages for details on the session annotation APIs.
+
 

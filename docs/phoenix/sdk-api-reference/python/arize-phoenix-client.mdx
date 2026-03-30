@@ -264,7 +264,7 @@ print(f"Created project with ID: {new_project['id']}")
 
 ## Sessions
 
-Retrieve session data for multi-turn conversations. Sessions group related traces from a conversation into a single timeline.
+Retrieve and manage multi-turn conversations. Sessions group related traces from aconversation into a single timeline.
 
 ```python
 # Get a specific session by ID
@@ -284,6 +284,23 @@ df = client.sessions.get_sessions_dataframe(project_name="my-chatbot")
 print(df[["session_id", "start_time", "end_time", "num_traces"]])
 ```
 
+```python
+# Reconstruct the ordered turns for a session
+turns = client.sessions.get_session_turns(session_id="my-session")
+for turn in turns:
+    input_val = turn.get("input", {}).get("value", "<no input>")
+    output_val = turn.get("output", {}).get("value", "<no output>")
+    print(f"{turn['start_time']}: {input_val} -> {output_val}")
+```
+
+```python
+# Delete a single session (and its traces, spans, and annotations)
+client.sessions.delete(session_id="my-session")
+
+# Bulk delete multiple sessions
+client.sessions.bulk_delete(session_ids=["session-1", "session-2"])
+```
+
 ### Async Usage
 
 ```python
@@ -294,7 +311,32 @@ async_client = AsyncClient()
 session = await async_client.sessions.get(session_id="my-session-id")
 sessions = await async_client.sessions.list(project_name="my-chatbot", limit=10)
 df = await async_client.sessions.get_sessions_dataframe(project_name="my-chatbot")
+
+turns = await async_client.sessions.get_session_turns(session_id="my-session")
+await async_client.sessions.delete(session_id="my-session")
+await async_client.sessions.bulk_delete(session_ids=["session-1", "session-2"])
 ```
+
+<Warning>
+Deleting sessions is irreversible and cascades to all associated traces, spans, and annotations. Use bulk deletion carefully in production environments.
+</Warning>
+
+### Reference
+
+- `get(session_id: str, timeout: Optional[int] = 5) -> dict` — retrieve a single session
+- `list(project_name: str, limit: Optional[int] = None, timeout: Optional[int] = 5)` — list sessions for a project
+- `get_sessions_dataframe(project_name: str, timeout: Optional[int] = 5)` — retrieve sessions as a pandas DataFrame
+- `get_session_turns(session_id: str, timeout: Optional[int] = 5)` — reconstruct the ordered turns for a session
+- `delete(session_id: str, timeout: Optional[int] = 5) -> None` — delete a single session
+- `bulk_delete(session_ids: List[str], timeout: Optional[int] = 5) -> None` — delete multiple sessions at once
+
+```python
+from phoenix.client import Client
+
+client = Client()
+turns = client.sessions.get_session_turns(session_id="my-session")
+```
+
 
 ---
 

@@ -185,6 +185,32 @@ You can then click into a given session. This will open the history of a particu
   <img src="https://storage.googleapis.com/arize-phoenix-assets/assets/images/phoenix-docs-images/8afa6160-image.jpeg" />
 </Frame>
 
+## Next steps: querying and managing sessions
+
+After you've instrumented your application and started generating sessions, you can use the Phoenix client SDKs to reconstruct conversations and manage session lifecycle.
+
+```python
+from phoenix.client import Client
+
+client = Client()
+
+# Reconstruct the ordered turns for a session
+turns = client.sessions.get_session_turns(session_id="my-session")
+for turn in turns:
+    print(turn["input"]["value"], "->", turn["output"]["value"])
+```
+
+```ts
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session" });
+for (const turn of turns) {
+  console.log(turn.input?.value, "->", turn.output?.value);
+}
+```
+
+For more on reconstructing conversations, deleting sessions, and working with session-level annotations, see the main [Sessions](/docs/phoenix/tracing/llm-traces/sessions) page and the Python and TypeScript SDK references.
+
 ## How to track sessions with LangChain
 
 For LangChain, in order to log runs as part of the same thread you need to pass a special metadata key to the run. The key value is the unique identifier for that conversation. The key name should be one of:
