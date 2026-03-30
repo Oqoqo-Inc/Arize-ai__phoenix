@@ -282,7 +282,22 @@ recent = client.sessions.list(project_name="my-chatbot", limit=10)
 # Get sessions as a pandas DataFrame
 df = client.sessions.get_sessions_dataframe(project_name="my-chatbot")
 print(df[["session_id", "start_time", "end_time", "num_traces"]])
+
+# Reconstruct ordered turns for a session (experimental)
+turns = client.sessions.get_session_turns(session_id="my-session-id")
+for turn in turns:
+    input_val = turn.get("input", {}).get("value", "<no input>")
+    output_val = turn.get("output", {}).get("value", "<no output>")
+    print(f"Turn (trace={turn['trace_id']}): {input_val} -> {output_val}")
+
+# Delete sessions when no longer needed
+client.sessions.delete(session_id="old-session-id")
+client.sessions.bulk_delete(session_ids=["session-1", "session-2"])
 ```
+
+`get_session_turns` is **experimental** and requires a recent Phoenix server (13.5.0 or later). It returns turns ordered by `start_time` and only includes input and output values when your tracing instrumentation records them on the root span.
+
+Session delete and bulk delete are **hard** deletes that cascade to traces, spans, and annotations for the deleted sessions. These APIs require Phoenix server 13.13.0 or later.
 
 ### Async Usage
 
@@ -294,6 +309,10 @@ async_client = AsyncClient()
 session = await async_client.sessions.get(session_id="my-session-id")
 sessions = await async_client.sessions.list(project_name="my-chatbot", limit=10)
 df = await async_client.sessions.get_sessions_dataframe(project_name="my-chatbot")
+
+turns = await async_client.sessions.get_session_turns(session_id="my-session-id")
+await async_client.sessions.delete(session_id="old-session-id")
+await async_client.sessions.bulk_delete(session_ids=["session-1", "session-2"])
 ```
 
 ---

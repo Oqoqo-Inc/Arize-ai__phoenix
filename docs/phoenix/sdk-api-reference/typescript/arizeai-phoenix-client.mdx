@@ -296,6 +296,60 @@ for (const session of sessions) {
 }
 ```
 
+### Get Session Turns
+
+```javascript
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session-id" });
+
+for (const [index, turn] of turns.entries()) {
+  const inputVal = turn.input?.value ?? "<no input>";
+  const outputVal = turn.output?.value ?? "<no output>";
+  console.log(`Turn ${index + 1}: ${inputVal} -> ${outputVal}`);
+}
+```
+
+`getSessionTurns` reconstructs the ordered turns in a session from its traces based on `startTime`. This API is experimental and requires a recent Phoenix server (13.5.0 or later). Input and output values are present when your tracing instrumentation records them on the root span.
+
+### Delete Sessions
+
+```javascript
+import { deleteSession, deleteSessions } from "@arizeai/phoenix-client/sessions";
+
+// Delete a single session
+await deleteSession({ sessionId: "my-session-id" });
+
+// Bulk delete multiple sessions
+await deleteSessions({ sessionIds: ["session-1", "session-2"] });
+```
+
+`deleteSession` and `deleteSessions` perform **hard** deletes that cascade to traces, spans, and annotations for the deleted sessions. These APIs require Phoenix server 13.13.0 or later. Non-existent session IDs are ignored, but all IDs in a bulk call must be the same type (either Phoenix GlobalIDs or user-defined identifiers).
+
+### Log Session Annotations
+
+```javascript
+import { logSessionAnnotations } from "@arizeai/phoenix-client/sessions";
+
+await logSessionAnnotations({
+  sessionAnnotations: [
+    {
+      sessionId: "my-session-id",
+      name: "overall-helpfulness",
+      label: "helpful",
+      score: 0.9,
+      explanation: "Responses directly answered the user's questions.",
+      // Optional identifier for upserts
+      identifier: "eval-run-123",
+    },
+  ],
+  // Make the call synchronous if you want to wait for completion
+  sync: false,
+});
+```
+
+`logSessionAnnotations` records annotations at the session level. When an `identifier` is provided, repeated calls upsert the existing annotation instead of creating duplicates. If `annotatorKind` is omitted it defaults to `HUMAN`. At least one of `label`, `score`, or `explanation` must be provided.
+
 ## Compatibility
 
 This package utilizes [openapi-ts](https://openapi-ts.pages.dev/) to generate types from the Phoenix OpenAPI spec.

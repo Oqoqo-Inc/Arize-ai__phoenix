@@ -21,6 +21,60 @@ With Sessions in Phoenix, you can:
 
 This feature is particularly valuable for applications where context builds over time, like chatbots, virtual assistants, or any other multi-turn interaction. By tagging spans with a consistent session ID, you create a connected view that reveals how your application performs across an entire user journey.
 
+## What you can do with sessions
+
+With sessions you can:
+
+* Group all traces from a multi-turn conversation into a single thread
+* Reconstruct the conversation as ordered turns for review or offline analysis
+* Attach session-level annotations (labels, scores, explanations) for evaluation
+* Clean up old sessions, including all associated traces and annotations
+
+## Reconstructing conversations (session turns)
+
+Each session in Phoenix is composed of one or more traces. A **session turn** corresponds to a single trace and represents one input/output pair in the conversation, along with timing information and the root span.
+
+In the Phoenix UI, session turns appear in the chatbot-like view for a session. Programmatically, you can reconstruct these turns using the Session Turns API:
+
+* Python: `client.sessions.get_session_turns(session_id="...")`
+* TypeScript: `getSessionTurns({ sessionId: "..." })`
+
+These APIs fetch all traces in the session and return an ordered list of turns based on their `start_time`. Input and output values are populated when your tracing instrumentation records them on the root span.
+
+## Managing sessions
+
+Phoenix exposes APIs to manage sessions over time:
+
+* Retrieve sessions and list them by project
+* Delete a single session when it is no longer needed
+* Bulk delete many sessions at once (for example, old test sessions)
+
+Deleting a session cascades to its traces, spans, and annotations.
+
+<Warning>
+Session deletes are **permanent** cascade deletes. Deleting a session removes its traces, spans, and annotations and cannot be undone.
+
+Session delete APIs require recent Phoenix server versions (13.13.0 or later). Make sure your server is up to date before using them.
+</Warning>
+
+## Session annotations
+
+You can log annotations at the session level to capture labels, scores, and free-form explanations that apply to the entire conversation. For example, you might log overall helpfulness or safety scores for a session.
+
+In Python, use the session resources on the client. In TypeScript, use the `logSessionAnnotations` helper from the Phoenix client sessions module.
+
+## APIs and SDKs
+
+The following SDK entry points are commonly used with sessions:
+
+* **Python**
+  * `client.sessions.get(session_id=...)`, `client.sessions.list(...)`, `client.sessions.get_sessions_dataframe(...)`
+  * `client.sessions.get_session_turns(session_id=...)`
+  * `client.sessions.delete(session_id=...)`, `client.sessions.bulk_delete(session_ids=[...])`
+* **TypeScript**
+  * `getSession`, `listSessions` from `@arizeai/phoenix-client/sessions`
+  * `getSessionTurns`, `deleteSession`, `deleteSessions`, `logSessionAnnotations` from the same module
+
 ## Next Steps
 
 <CardGroup cols={2}>
