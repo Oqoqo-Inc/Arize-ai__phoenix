@@ -261,7 +261,7 @@ const experiment = await runExperiment({
 
 ## Sessions
 
-Retrieve session data for multi-turn conversations. Sessions group related traces from a conversation into a single timeline.
+Retrieve and manage session data for multi-turn conversations. Sessions group related traces from a conversation into a single timeline.
 
 ### Get a Session
 
@@ -294,6 +294,56 @@ const sessionsByProject = await listSessions({ project: "my-chatbot" });
 for (const session of sessions) {
   console.log(`${session.sessionId}: ${session.traces.length} traces`);
 }
+```
+
+### Session turns
+
+Reconstruct the ordered turns in a conversation from all traces in a session:
+
+```ts
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session-id" });
+for (const turn of turns) {
+  console.log(`[${turn.startTime}] Input:`, turn.input?.value);
+  console.log(`[${turn.startTime}] Output:`, turn.output?.value);
+}
+```
+
+### Delete sessions
+
+Delete individual sessions or multiple sessions when you need to clean up test data, enforce retention policies, or remove conversations.
+
+```ts
+import { deleteSession, deleteSessions } from "@arizeai/phoenix-client/sessions";
+
+// Delete a single session
+await deleteSession({ sessionId: "my-session-id" });
+
+// Bulk delete multiple sessions
+await deleteSessions({ sessionIds: ["session-1", "session-2"] });
+```
+
+<Warning>
+Deleting a session permanently removes the session and its associated traces, spans, and annotations. This operation cannot be undone.
+</Warning>
+
+### Session-level annotations
+
+Attach annotations to entire sessions for evaluation and review workflows:
+
+```ts
+import { logSessionAnnotations } from "@arizeai/phoenix-client/sessions";
+
+await logSessionAnnotations({
+  annotations: [
+    {
+      sessionId: "my-session-id",
+      name: "helpfulness",
+      result: { label: "helpful", score: 0.9 },
+    },
+  ],
+});
 ```
 
 ## Compatibility

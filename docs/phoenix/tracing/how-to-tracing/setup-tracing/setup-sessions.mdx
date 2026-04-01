@@ -185,6 +185,187 @@ You can then click into a given session. This will open the history of a particu
   <img src="https://storage.googleapis.com/arize-phoenix-assets/assets/images/phoenix-docs-images/8afa6160-image.jpeg" />
 </Frame>
 
+## Query sessions programmatically
+
+Once you are attaching a `session_id` to your traces, you can list and fetch sessions from your application code.
+
+<Tabs>
+
+  <Tab title="Python" icon="python">
+
+```python
+from phoenix.client import Client
+
+client = Client()
+
+# List sessions for a project
+sessions = client.sessions.list(project_name="my-chatbot", limit=10)
+for session in sessions:
+    print(session["session_id"], len(session["traces"]))
+
+# Get a specific session by ID
+session = client.sessions.get(session_id="my-session-id")
+print(session["session_id"], len(session["traces"]))
+```
+
+  </Tab>
+
+  <Tab title="TypeScript" icon="js">
+
+```ts
+import { getSession, listSessions } from "@arizeai/phoenix-client/sessions";
+
+// List sessions for a project
+const sessions = await listSessions({ projectName: "my-chatbot" });
+for (const session of sessions) {
+  console.log(session.sessionId, session.traces.length);
+}
+
+// Get a specific session by ID
+const session = await getSession({ sessionId: "my-session-id" });
+console.log(session.sessionId, session.traces.length);
+```
+
+  </Tab>
+
+</Tabs>
+
+## Reconstruct conversation turns for a session
+
+Use the session turns API to reconstruct ordered input/output pairs for a conversation.
+
+<Tabs>
+
+  <Tab title="Python" icon="python">
+
+```python
+from phoenix.client import Client
+
+client = Client()
+
+turns = client.sessions.get_session_turns(session_id="my-session-id")
+for turn in turns:
+    input_val = turn.get("input", {}).get("value", "<no input>")
+    output_val = turn.get("output", {}).get("value", "<no output>")
+    print(input_val, "->", output_val)
+```
+
+<Note>
+The session turns API reconstructs turns from traces instrumented with OpenInference semantic attributes and is experimental. The shape of `SessionTurn` may change in future versions.
+</Note>
+
+  </Tab>
+
+  <Tab title="TypeScript" icon="js">
+
+```ts
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session-id" });
+for (const turn of turns) {
+  console.log("input:", turn.input?.value);
+  console.log("output:", turn.output?.value);
+}
+```
+
+  </Tab>
+
+</Tabs>
+
+## Delete sessions
+
+Delete individual sessions or multiple sessions when you need to clean up test data, enforce retention policies, or remove conversations.
+
+<Tabs>
+
+  <Tab title="Python" icon="python">
+
+```python
+from phoenix.client import Client
+
+client = Client()
+
+# Delete a single session
+client.sessions.delete(session_id="my-session-id")
+
+# Bulk delete multiple sessions
+client.sessions.bulk_delete(session_ids=["session-1", "session-2"])
+```
+
+<Warning>
+Deleting a session permanently removes the session and its associated traces, spans, and annotations. This operation cannot be undone.
+</Warning>
+
+  </Tab>
+
+  <Tab title="TypeScript" icon="js">
+
+```ts
+import { deleteSession, deleteSessions } from "@arizeai/phoenix-client/sessions";
+
+// Delete a single session
+await deleteSession({ sessionId: "my-session-id" });
+
+// Bulk delete multiple sessions
+await deleteSessions({ sessionIds: ["session-1", "session-2"] });
+```
+
+  </Tab>
+
+</Tabs>
+
+## Annotate sessions
+
+Session-level annotations let you attach quality scores, labels, and notes to entire conversations.
+
+<Tabs>
+
+  <Tab title="Python" icon="python">
+
+```python
+import pandas as pd
+from phoenix.client import Client
+
+client = Client()
+
+data = pd.DataFrame(
+    [
+        {
+            "session_id": "my-session-id",
+            "result": {"label": "helpful", "score": 0.9},
+        }
+    ]
+)
+
+client.sessions.log_session_annotations_dataframe(
+    dataframe=data,
+    annotation_name="helpfulness",
+    annotator_kind="HUMAN",
+)
+```
+
+  </Tab>
+
+  <Tab title="TypeScript" icon="js">
+
+```ts
+import { logSessionAnnotations } from "@arizeai/phoenix-client/sessions";
+
+await logSessionAnnotations({
+  annotations: [
+    {
+      sessionId: "my-session-id",
+      name: "helpfulness",
+      result: { label: "helpful", score: 0.9 },
+    },
+  ],
+});
+```
+
+</Tab>
+
+</Tabs>
+
 ## How to track sessions with LangChain
 
 For LangChain, in order to log runs as part of the same thread you need to pass a special metadata key to the run. The key value is the unique identifier for that conversation. The key name should be one of:

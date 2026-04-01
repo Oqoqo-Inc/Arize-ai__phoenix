@@ -264,7 +264,7 @@ print(f"Created project with ID: {new_project['id']}")
 
 ## Sessions
 
-Retrieve session data for multi-turn conversations. Sessions group related traces from a conversation into a single timeline.
+Retrieve and manage session data for multi-turn conversations. Sessions group related traces from a conversation into a single timeline.
 
 ```python
 # Get a specific session by ID
@@ -272,16 +272,68 @@ session = client.sessions.get(session_id="my-session-id")
 print(f"Session: {session['session_id']}, Traces: {len(session['traces'])}")
 
 # List sessions for a project
-sessions = client.sessions.list(project_name="my-chatbot")
+sessions = client.sessions.list(project_name="my-chatbot", limit=10)
 for s in sessions:
     print(f"{s['session_id']}: {len(s['traces'])} traces")
-
-# List with a limit
-recent = client.sessions.list(project_name="my-chatbot", limit=10)
 
 # Get sessions as a pandas DataFrame
 df = client.sessions.get_sessions_dataframe(project_name="my-chatbot")
 print(df[["session_id", "start_time", "end_time", "num_traces"]])
+```
+
+### Session turns
+
+Reconstruct the ordered turns in a conversation from all traces in a session:
+
+```python
+from phoenix.client import Client
+
+client = Client()
+
+turns = client.sessions.get_session_turns(session_id="my-session-id")
+for turn in turns:
+    input_val = turn.get("input", {}).get("value", "<no input>")
+    output_val = turn.get("output", {}).get("value", "<no output>")
+    print(f"Turn {turn['trace_id']}: {input_val} -> {output_val}")
+```
+
+### Delete sessions
+
+Delete individual sessions or multiple sessions when you need to clean up test data, enforce retention policies, or remove conversations.
+
+```python
+# Delete a single session
+client.sessions.delete(session_id="my-session-id")
+
+# Bulk delete multiple sessions
+client.sessions.bulk_delete(session_ids=["session-1", "session-2"])
+```
+
+<Warning>
+Deleting a session permanently removes the session and its associated traces, spans, and annotations. This operation cannot be undone.
+</Warning>
+
+### Session-level annotations
+
+Attach annotations to entire sessions for evaluation and review workflows:
+
+```python
+import pandas as pd
+
+annotations_df = pd.DataFrame(
+    [
+        {
+            "session_id": "my-session-id",
+            "result": {"label": "helpful", "score": 0.9},
+        }
+    ]
+)
+
+client.sessions.log_session_annotations_dataframe(
+    dataframe=annotations_df,
+    annotation_name="helpfulness",
+    annotator_kind="HUMAN",
+)
 ```
 
 ### Async Usage
@@ -294,8 +346,8 @@ async_client = AsyncClient()
 session = await async_client.sessions.get(session_id="my-session-id")
 sessions = await async_client.sessions.list(project_name="my-chatbot", limit=10)
 df = await async_client.sessions.get_sessions_dataframe(project_name="my-chatbot")
+turns = await async_client.sessions.get_session_turns(session_id="my-session-id")
 ```
-
 ---
 
 ## Reference Documentation
