@@ -21,6 +21,16 @@ With Sessions in Phoenix, you can:
 
 This feature is particularly valuable for applications where context builds over time, like chatbots, virtual assistants, or any other multi-turn interaction. By tagging spans with a consistent session ID, you create a connected view that reveals how your application performs across an entire user journey.
 
+## Managing Sessions Programmatically
+
+The Phoenix client exposes APIs for working with sessions beyond the UI:
+
+- **Reconstruct conversation turns** — retrieve ordered input/output pairs for each trace in a session (`get_session_turns` / `getSessionTurns`)
+- **Delete sessions** — permanently remove a session and all its traces, spans, and annotations (`delete` / `deleteSession`, `bulk_delete` / `deleteSessions`)
+- **Annotate sessions** — attach scores, labels, and metadata to entire sessions for evaluation workflows (`logSessionAnnotations`)
+
+See [Setup Sessions](/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-sessions) for full examples.
+
 ## Next Steps
 
 <CardGroup cols={2}>

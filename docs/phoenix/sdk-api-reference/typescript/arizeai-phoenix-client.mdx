@@ -296,6 +296,96 @@ for (const session of sessions) {
 }
 ```
 
+### Get Session Turns
+
+Reconstruct the ordered conversation turns for a session. Each turn corresponds to one trace and exposes the root span's input/output values.
+
+<Note>
+`getSessionTurns` is experimental and its interface may change in future releases. Input/output fields are only present when the root span carries `input.value` / `output.value` attributes (OpenInference semantic conventions). Requires Phoenix server >= 13.5.0.
+</Note>
+
+```javascript
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session-id" });
+
+for (const turn of turns) {
+  console.log(`[${turn.startTime}] Trace: ${turn.traceId}`);
+  console.log(`  Input:  ${turn.input?.value ?? "<no input>"}`);
+  console.log(`  Output: ${turn.output?.value ?? "<no output>"}`);
+}
+```
+
+Each `SessionTurn` object contains:
+- `traceId` — trace ID for this turn
+- `startTime` / `endTime` — ISO-8601 timestamps
+- `input` / `output` — optional objects with `value` (string) and `mimeType` (string, optional)
+- `rootSpan` — the full root span object, if found
+
+### Delete Sessions
+
+Permanently delete one or more sessions, including all associated traces, spans, and annotations.
+
+<Warning>
+Session deletion is irreversible. Requires Phoenix server >= 13.13.0.
+</Warning>
+
+```javascript
+import { deleteSession, deleteSessions } from "@arizeai/phoenix-client/sessions";
+
+// Delete a single session (throws if not found)
+await deleteSession({ sessionId: "my-session-id" });
+
+// Delete multiple sessions in one request
+await deleteSessions({ sessionIds: ["session-1", "session-2", "session-3"] });
+```
+
+**Notes:**
+- `deleteSession` throws an error if the session is not found.
+- `deleteSessions` silently skips non-existent IDs.
+- All identifiers must be the same type — either all user-provided strings or all Phoenix GlobalIDs (base64-encoded). Mixing types is not supported.
+
+### Annotate Sessions
+
+Attach scores, labels, and metadata to entire sessions for evaluation and quality tracking.
+
+<Note>
+`logSessionAnnotations` requires Phoenix server >= 12.0.0.
+</Note>
+
+```javascript
+import { logSessionAnnotations } from "@arizeai/phoenix-client/sessions";
+
+const results = await logSessionAnnotations({
+  sessionAnnotations: [
+    {
+      sessionId: "my-session-id",
+      name: "quality_score",
+      label: "good",
+      score: 0.95,
+      annotatorKind: "LLM",   // "LLM" | "CODE" | "HUMAN" (default: "HUMAN")
+      metadata: { model: "gpt-4o" },
+    },
+    {
+      sessionId: "my-session-id",
+      name: "sentiment",
+      label: "positive",
+      score: 0.8,
+      annotatorKind: "CODE",
+    },
+  ],
+  sync: false,  // set to true to receive annotation IDs synchronously
+});
+```
+
+Each `SessionAnnotation` accepts:
+- `sessionId` — the session to annotate
+- `name` — annotation name (e.g. `"quality_score"`)
+- `label` / `score` / `explanation` — at least one must be provided
+- `annotatorKind` — `"LLM"`, `"CODE"`, or `"HUMAN"` (default `"HUMAN"`)
+- `identifier` — optional idempotency key; if provided and an annotation with this identifier already exists, it will be updated
+- `metadata` — optional key/value metadata
+
 ## Compatibility
 
 This package utilizes [openapi-ts](https://openapi-ts.pages.dev/) to generate types from the Phoenix OpenAPI spec.
