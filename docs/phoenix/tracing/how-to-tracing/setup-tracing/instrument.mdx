@@ -134,6 +134,30 @@ The code within this clause will be captured as a Span in Phoenix. Here the inpu
 
 This approach is useful when you need only a portion of a method to be captured as a Span.
 
+## 3. Using the @observe decorator (TypeScript)
+
+If you're using TypeScript classes, the `@observe` decorator from `@arizeai/openinference-core` provides a concise way to trace class methods. It automatically captures inputs, outputs, and errors as span attributes.
+
+```typescript
+import { observe } from "@arizeai/openinference-core";
+
+class ChatService {
+  @observe({ kind: "chain" })
+  async processMessage(message: string) {
+    return `Processed: ${message}`;
+  }
+
+  @observe({ name: "llm-call", kind: "llm" })
+  async callLLM(prompt: string) {
+    return await llmClient.generate(prompt);
+  }
+}
+```
+
+<Info>
+`@observe` requires TypeScript with decorator support enabled (`experimentalDecorators` in `tsconfig.json`). For standalone functions, use the wrapper helpers above instead.
+</Info>
+
 # OpenInference Span Kinds
 
 OpenInference Span Kinds denote the possible types of spans you might capture, and will be rendered different in the Phoenix UI.
