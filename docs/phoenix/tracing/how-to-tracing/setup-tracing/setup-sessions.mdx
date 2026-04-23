@@ -16,6 +16,21 @@ A `Session` is a sequence of traces representing a single session (e.g. a sessio
 
 To associate traces together, you need to pass in a special metadata key where the value is the unique identifier for that thread.
 
+Once those traces are recorded, you can use the session clients to inspect, reconstruct, and clean up sessions:
+
+* `get_session_turns()` / `getSessionTurns()` reconstruct the ordered turns from a session's traces.
+* `delete()` / `deleteSession()` delete a single session and cascade to its traces, spans, and annotations.
+* `bulk_delete()` / `deleteSessions()` delete multiple sessions in one request.
+* `log_session_annotations()` / `logSessionAnnotations()` attach session-level evaluations after you have built a transcript.
+
+<Warning>
+  `get_session_turns()` only returns turns when the root span has `input.value` and `output.value` attributes. If your traces are missing those attributes, the session still exists, but the turn reconstruction will be incomplete.
+</Warning>
+
+<Note>
+  Deletion is permanent and cascades to all related traces, spans, and annotations. Use bulk delete for cleanup jobs and test data, not for interactive workflows.
+</Note>
+
 ## Example Notebooks
 
 

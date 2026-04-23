@@ -12,20 +12,26 @@ Sessions enable tracking and organizing related traces across multi-turn convers
 With Sessions in Phoenix, you can:
 
 * Track the entire history of a conversation in a single thread
-
 * View conversations in a chatbot-like UI showing inputs and outputs of each turn
-
 * Search through sessions to find specific interactions
-
+* Reconstruct ordered turns from a session's traces for downstream analysis
+* Delete one session or bulk-delete sessions when you need to clean up test or stale data
 * Track token usage and latency per conversation
+
+<Note>
+  The management APIs live on the client SDKs, not just the UI. Use them when you need to export transcripts, automate cleanup, or build session-level workflows outside Phoenix.
+</Note>
 
 This feature is particularly valuable for applications where context builds over time, like chatbots, virtual assistants, or any other multi-turn interaction. By tagging spans with a consistent session ID, you create a connected view that reveals how your application performs across an entire user journey.
 
 ## Next Steps
 
-<CardGroup cols={2}>
+<CardGroup cols={3}>
   <Card title="Setup Sessions" icon="gear" href="/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-sessions">
     Configure session tracking in your application
+  </Card>
+  <Card title="Manage Sessions" icon="list" href="/docs/phoenix/sdk-api-reference/rest-api/api-reference/sessions">
+    Query, reconstruct, and delete sessions through the API
   </Card>
   <Card title="Setup Projects" icon="folder" href="/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-projects">
     Organize traces into separate projects
