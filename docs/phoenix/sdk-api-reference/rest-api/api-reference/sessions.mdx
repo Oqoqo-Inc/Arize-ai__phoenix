@@ -3,3 +3,17 @@ title: "Sessions"
 sidebarTitle: "Overview"
 description: "REST API methods for interacting with Phoenix sessions"
 ---
+
+Phoenix exposes session retrieval and cleanup APIs for browsing sessions in a project, reconstructing related workflows in client code, and removing sessions you no longer need.
+
+## Endpoints
+
+- `GET /v1/sessions/{session_id}` retrieves a single session by session ID or GlobalID.
+- `GET /v1/projects/{project}/sessions` lists sessions for a project with pagination support.
+- `DELETE /v1/sessions/{session_id}` deletes a session and cascades through associated traces, spans, and session annotations.
+- `POST /v1/sessions/delete` deletes multiple sessions in a single request.
+
+<Note>
+Session deletion endpoints require `arize-phoenix 13.13.0+`.
+
+</Note>

@@ -266,15 +266,17 @@ print(f"Created project with ID: {new_project['id']}")
 
 Retrieve session data for multi-turn conversations. Sessions group related traces from a conversation into a single timeline.
 
+Session retrieval methods such as `get()` and `list()` return `v1.SessionData` objects. The session turns API returns `SessionTurn` objects with `input` and `output` values stored as `SessionTurnIO` objects.
+
 ```python
 # Get a specific session by ID
 session = client.sessions.get(session_id="my-session-id")
-print(f"Session: {session['session_id']}, Traces: {len(session['traces'])}")
+print(session.session_id)
 
 # List sessions for a project
 sessions = client.sessions.list(project_name="my-chatbot")
-for s in sessions:
-    print(f"{s['session_id']}: {len(s['traces'])} traces")
+for session in sessions:
+    print(session.session_id)
 
 # List with a limit
 recent = client.sessions.list(project_name="my-chatbot", limit=10)
@@ -282,7 +284,26 @@ recent = client.sessions.list(project_name="my-chatbot", limit=10)
 # Get sessions as a pandas DataFrame
 df = client.sessions.get_sessions_dataframe(project_name="my-chatbot")
 print(df[["session_id", "start_time", "end_time", "num_traces"]])
+
+# Delete one session or several sessions
+client.sessions.delete(session_id="test-session")
+client.sessions.bulk_delete(session_ids=["test-session-1", "test-session-2"])
+
+# Reconstruct ordered turns for a session
+turns = client.sessions.get_session_turns(session_id="my-session-id")
+for turn in turns:
+    print(turn.trace_id, turn.input.value if turn.input else None)
 ```
+
+<Warning>
+`client.sessions.get_session_turns()` is experimental and may change in future releases.
+
+</Warning>
+
+<Note>
+Deleting a session cascades through its traces, spans, and session annotations.
+
+</Note>
 
 ### Async Usage
 
@@ -294,6 +315,9 @@ async_client = AsyncClient()
 session = await async_client.sessions.get(session_id="my-session-id")
 sessions = await async_client.sessions.list(project_name="my-chatbot", limit=10)
 df = await async_client.sessions.get_sessions_dataframe(project_name="my-chatbot")
+await async_client.sessions.delete(session_id="test-session")
+await async_client.sessions.bulk_delete(session_ids=["test-session-1", "test-session-2"])
+turns = await async_client.sessions.get_session_turns(session_id="my-session-id")
 ```
 
 ---

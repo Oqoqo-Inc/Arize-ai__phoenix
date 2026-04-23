@@ -296,6 +296,71 @@ for (const session of sessions) {
 }
 ```
 
+### Delete a Session
+
+```javascript
+import { deleteSession } from "@arizeai/phoenix-client/sessions";
+
+await deleteSession({ sessionId: "test-session" });
+```
+
+<Note>
+Deleting a session cascades through its traces, spans, and session annotations.
+
+</Note>
+
+### Delete Multiple Sessions
+
+```javascript
+import { deleteSessions } from "@arizeai/phoenix-client/sessions";
+
+await deleteSessions({ sessionIds: ["test-session-1", "test-session-2"] });
+```
+
+All session IDs passed to `deleteSessions()` must use the same identifier type.
+
+### Get Session Turns
+
+```javascript
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session-id" });
+for (const turn of turns) {
+  console.log(turn.traceId, turn.input?.value, turn.output?.value, turn.input?.mimeType);
+}
+```
+
+<Warning>
+`getSessionTurns()` is experimental and may change in future releases.
+
+</Warning>
+
+Each turn is returned in chronological order and includes `input` and `output` payloads as `SessionTurnIO` objects.
+
+### Log Session Annotations
+
+```javascript
+import { logSessionAnnotations } from "@arizeai/phoenix-client/sessions";
+
+await logSessionAnnotations({
+  sessionAnnotations: [
+    {
+      sessionId: "my-session-id",
+      name: "resolution",
+      annotatorKind: "HUMAN",
+      result: { label: "resolved", score: 1 },
+    },
+  ],
+  sync: true,
+});
+```
+
+Use `sync: true` when you need annotation IDs returned immediately.
+
+## Compatibility
+
+This package utilizes [openapi-ts](https://openapi-ts.pages.dev/) to generate types from the Phoenix OpenAPI spec.
+
 ## Compatibility
 
 This package utilizes [openapi-ts](https://openapi-ts.pages.dev/) to generate types from the Phoenix OpenAPI spec.

@@ -21,11 +21,13 @@ With Sessions in Phoenix, you can:
 
 This feature is particularly valuable for applications where context builds over time, like chatbots, virtual assistants, or any other multi-turn interaction. By tagging spans with a consistent session ID, you create a connected view that reveals how your application performs across an entire user journey.
 
+Once sessions are instrumented, Phoenix also lets you retrieve individual sessions, list sessions for a project, reconstruct ordered conversation turns from session traces, and delete sessions that you no longer need. Those workflows are useful for debugging chat history, exporting conversation metadata for analysis, and cleaning up test or stale sessions.
+
 ## Next Steps
 
 <CardGroup cols={2}>
   <Card title="Setup Sessions" icon="gear" href="/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-sessions">
-    Configure session tracking in your application
+    Configure session tracking, query sessions, reconstruct turns, and clean up sessions
   </Card>
   <Card title="Setup Projects" icon="folder" href="/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-projects">
     Organize traces into separate projects
