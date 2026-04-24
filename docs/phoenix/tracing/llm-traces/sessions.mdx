@@ -23,13 +23,46 @@ This feature is particularly valuable for applications where context builds over
 
 ## Next Steps
 
-<CardGroup cols={2}>
+<CardGroup cols={3}>
   <Card title="Setup Sessions" icon="gear" href="/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-sessions">
     Configure session tracking in your application
+  </Card>
+  <Card title="Session Turns API" icon="list" href="/docs/phoenix/release-notes/03-2026/03-11-2026-session-turns-api">
+    Reconstruct ordered conversation turns from a session
   </Card>
   <Card title="Setup Projects" icon="folder" href="/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-projects">
     Organize traces into separate projects
   </Card>
 </CardGroup>
+
+## Session Management
+
+Sessions are visible in the UI, but you can also manage them programmatically when you need to inspect, annotate, or clean up conversation history.
+
+* Use `client.sessions.get_session_turns()` or `getSessionTurns()` to reconstruct ordered turns from a session's root spans.
+* Use `client.sessions.delete()` or `deleteSession()` to permanently remove a session and its related traces, spans, and annotations.
+* Use `client.sessions.bulk_delete()` or `deleteSessions()` to remove multiple sessions in one request.
+* Use `client.sessions.log_session_annotations()` or `logSessionAnnotations()` to attach review results, labels, or other metadata to a session.
+
+<Warning>
+Deletion is permanent and cascades through traces, spans, and annotations. Bulk deletion also requires all identifiers to use the same identifier type.
+</Warning>
+
+<Note>
+The session turns API is experimental and derives each turn from the root span's `input.value` and `output.value` attributes. If those attributes are missing, the turn still appears, but its input or output may be empty.
+</Note>
+
+## When to use each API
+
+* **View a session** when you only need the conversation timeline in the Phoenix UI.
+* **Reconstruct turns** when you need the ordered input/output pairs for downstream processing, export, or debugging.
+* **Delete sessions** when you need to remove stale or incorrect conversation history.
+* **Log annotations** when you want to capture human or automated feedback on a session without deleting it.
+
+## Related SDK guides
+
+* Python: [`arize-phoenix-client`](/docs/phoenix/sdk-api-reference/python/arize-phoenix-client)
+* TypeScript: [`@arizeai/phoenix-client`](/docs/phoenix/sdk-api-reference/typescript/arizeai-phoenix-client)
+
 
 

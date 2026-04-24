@@ -296,6 +296,51 @@ for (const session of sessions) {
 }
 ```
 
+### Reconstruct Session Turns
+
+```javascript
+import { getSessionTurns } from "@arizeai/phoenix-client/sessions";
+
+const turns = await getSessionTurns({ sessionId: "my-session-id" });
+for (const turn of turns) {
+  console.log(turn.traceId, turn.input?.value, turn.output?.value);
+}
+```
+
+### Delete Sessions
+
+```javascript
+import { deleteSession, deleteSessions } from "@arizeai/phoenix-client/sessions";
+
+await deleteSession({ sessionId: "my-session-id" });
+await deleteSessions({ sessionIds: ["session-1", "session-2"] });
+```
+
+### Log Session Annotations
+
+```javascript
+import { logSessionAnnotations } from "@arizeai/phoenix-client/sessions";
+
+await logSessionAnnotations({
+  sessionAnnotations: [
+    {
+      sessionId: "my-session-id",
+      name: "quality",
+      annotatorKind: "HUMAN",
+      label: "good",
+    },
+  ],
+});
+```
+
+<Warning>
+Deleting a session removes its traces, spans, and annotations. Bulk deletion requires identifiers of the same type.
+</Warning>
+
+<Note>
+`getSessionTurns()` is experimental and reconstructs turns from each trace's root span. If those spans do not record `input.value` and `output.value`, the turn list still returns, but those fields may be empty.
+</Note>
+
 ## Compatibility
 
 This package utilizes [openapi-ts](https://openapi-ts.pages.dev/) to generate types from the Phoenix OpenAPI spec.

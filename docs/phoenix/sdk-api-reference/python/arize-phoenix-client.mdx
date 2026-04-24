@@ -266,11 +266,17 @@ print(f"Created project with ID: {new_project['id']}")
 
 Retrieve session data for multi-turn conversations. Sessions group related traces from a conversation into a single timeline.
 
+### Get a Session
+
 ```python
 # Get a specific session by ID
 session = client.sessions.get(session_id="my-session-id")
 print(f"Session: {session['session_id']}, Traces: {len(session['traces'])}")
+```
 
+### List Sessions
+
+```python
 # List sessions for a project
 sessions = client.sessions.list(project_name="my-chatbot")
 for s in sessions:
@@ -284,6 +290,36 @@ df = client.sessions.get_sessions_dataframe(project_name="my-chatbot")
 print(df[["session_id", "start_time", "end_time", "num_traces"]])
 ```
 
+### Reconstruct Session Turns
+
+```python
+turns = client.sessions.get_session_turns(session_id="my-session-id")
+for turn in turns:
+    print(turn["trace_id"], turn.get("input", {}).get("value"), turn.get("output", {}).get("value"))
+```
+
+### Delete Sessions
+
+```python
+client.sessions.delete(session_id="my-session-id")
+client.sessions.bulk_delete(session_ids=["session-1", "session-2"])
+```
+
+### Log Session Annotations
+
+```python
+client.sessions.log_session_annotations(
+    session_annotations=[
+        {
+            "session_id": "my-session-id",
+            "name": "quality",
+            "annotator_kind": "HUMAN",
+            "label": "good",
+        }
+    ]
+)
+```
+
 ### Async Usage
 
 ```python
@@ -293,8 +329,18 @@ async_client = AsyncClient()
 
 session = await async_client.sessions.get(session_id="my-session-id")
 sessions = await async_client.sessions.list(project_name="my-chatbot", limit=10)
+turns = await async_client.sessions.get_session_turns(session_id="my-session-id")
+await async_client.sessions.delete(session_id="my-session-id")
 df = await async_client.sessions.get_sessions_dataframe(project_name="my-chatbot")
 ```
+
+<Warning>
+Deleting a session removes its traces, spans, and annotations. Bulk deletion requires identifiers of the same type.
+</Warning>
+
+<Note>
+`get_session_turns()` is experimental and reconstructs turns from each trace's root span. If those spans do not record `input.value` and `output.value`, the turn list still returns, but those fields may be empty.
+</Note>
 
 ---
 
